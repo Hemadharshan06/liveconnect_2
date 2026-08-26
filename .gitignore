@@ -1,0 +1,15 @@
+# Database / runtime data
+liveconnect.db
+php/signals.json
+
+# Local configuration
+.env
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
