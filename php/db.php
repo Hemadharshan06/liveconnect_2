@@ -13,11 +13,11 @@
  *     root
  */
 
-$DB_HOST = "127.0.0.1";
-$DB_PORT = 3306;
-$DB_NAME = "liveconnect";
-$DB_USER = "root";
-$DB_PASS = "Dhachu@2004";
+$DB_HOST = getenv("DB_HOST") ?: "127.0.0.1";
+$DB_PORT = (int)(getenv("DB_PORT") ?: 3306);
+$DB_NAME = getenv("DB_NAME") ?: "liveconnect";
+$DB_USER = getenv("DB_USER") ?: "root";
+$DB_PASS = getenv("DB_PASS") ?: "JewnPylxQjuZdgJXNGiNaKZoZOPqzCbv";
 
 
 function get_db_connection()
