@@ -1,0 +1,3854 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>LiveConnect - Host</title>
+
+
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+>
+
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    rel="stylesheet"
+>
+
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+
+    overflow: hidden;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    background: #111827;
+}
+
+
+#startSection {
+
+    height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #111827,
+            #1e3a8a
+        );
+}
+
+
+.start-card {
+
+    width: 100%;
+
+    max-width: 440px;
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 35px;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0,0,0,.3);
+}
+
+
+#hostSection {
+
+    height: 100vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+}
+
+
+.topbar {
+
+    height: 64px;
+
+    flex-shrink: 0;
+
+    background: #1f2937;
+
+    border-bottom:
+        1px solid #374151;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0 18px;
+}
+
+
+.brand {
+
+    font-size: 21px;
+
+    font-weight: bold;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.brand i {
+
+    color: #3b82f6;
+}
+
+
+.header-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.code-box {
+
+    background: #111827;
+
+    border:
+        1px solid #4b5563;
+
+    border-radius: 7px;
+
+    padding:
+        5px 8px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.code {
+
+    color: #60a5fa;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+}
+
+
+.copy-btn {
+
+    border: none;
+
+    background: #374151;
+
+    color: white;
+
+    border-radius: 4px;
+
+    padding: 3px 7px;
+}
+
+
+.live {
+
+    background: #dc2626;
+
+    color: white;
+
+    padding:
+        8px 11px;
+
+    border-radius: 6px;
+
+    font-weight: bold;
+
+    font-size: 12px;
+}
+
+
+.main {
+
+    flex: 1;
+
+    min-height: 0;
+
+    display: flex;
+
+    gap: 12px;
+
+    padding: 12px;
+
+    overflow: hidden;
+}
+
+
+.video-area {
+
+    flex: 1;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    background: #000;
+
+    border-radius: 10px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(
+                220px,
+                1fr
+            )
+        );
+
+    grid-auto-rows: minmax(
+        160px,
+        1fr
+    );
+
+    gap: 8px;
+
+    padding: 8px;
+}
+
+
+.video-tile {
+
+    position: relative;
+
+    background: #050505;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    min-height: 0;
+}
+
+
+.video-tile video {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+}
+
+
+.video-name {
+
+    position: absolute;
+
+    left: 8px;
+
+    bottom: 8px;
+
+    background:
+        rgba(0,0,0,.65);
+
+    color: white;
+
+    padding:
+        5px 8px;
+
+    border-radius: 5px;
+
+    font-size: 12px;
+}
+
+
+.floating-reaction {
+
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 100px;
+
+    transform:
+        translateX(-50%);
+
+    font-size: 65px;
+
+    z-index: 100;
+
+    pointer-events: none;
+
+    animation:
+        floatEmoji 2s forwards;
+}
+
+
+/* =====================================================
+   LEAVE NOTIFICATION
+   ===================================================== */
+
+.leave-notification {
+
+    position: fixed;
+
+    top: 78px;
+
+    left: 50%;
+
+    transform: translateX(-50%) translateY(-15px);
+
+    z-index: 9999;
+
+    background: rgba(31, 41, 55, .96);
+
+    color: white;
+
+    border: 1px solid #4b5563;
+
+    border-radius: 10px;
+
+    padding: 10px 16px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+
+    font-size: 13px;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: opacity .25s ease, transform .25s ease;
+}
+
+.leave-notification.show {
+
+    opacity: 1;
+
+    transform: translateX(-50%) translateY(0);
+}
+
+@keyframes floatEmoji {
+
+    0% {
+
+        opacity: 0;
+
+        transform:
+            translate(-50%,20px)
+            scale(.6);
+    }
+
+    15% {
+
+        opacity: 1;
+    }
+
+    75% {
+
+        opacity: 1;
+
+        transform:
+            translate(-50%,-100px)
+            scale(1.1);
+    }
+
+    100% {
+
+        opacity: 0;
+
+        transform:
+            translate(-50%,-170px)
+            scale(1.3);
+    }
+
+}
+
+
+.side {
+
+    width: 330px;
+
+    flex-shrink: 0;
+
+    min-height: 0;
+
+    background: #1f2937;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    display: flex;
+
+    flex-direction: column;
+
+    color: white;
+}
+
+
+.tabs {
+
+    height: 48px;
+
+    display: flex;
+
+    border-bottom:
+        1px solid #374151;
+
+    flex-shrink: 0;
+}
+
+
+.tab {
+
+    flex: 1;
+
+    border: none;
+
+    background: transparent;
+
+    color: #9ca3af;
+
+    cursor: pointer;
+}
+
+
+.tab.active {
+
+    color: white;
+
+    border-bottom:
+        2px solid #3b82f6;
+}
+
+
+.panel {
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding: 12px;
+}
+
+
+.participant-item {
+
+    background: #374151;
+
+    border-radius: 7px;
+
+    padding: 9px;
+
+    margin-bottom: 7px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    font-size: 13px;
+}
+
+
+.chat-message {
+
+    margin-bottom: 10px;
+
+    font-size: 13px;
+}
+
+
+.chat-name {
+
+    color: #93c5fd;
+
+    font-weight: bold;
+}
+
+
+.chat-text {
+
+    color: #e5e7eb;
+
+    word-break: break-word;
+}
+
+
+.question {
+
+    background: #374151;
+
+    padding: 10px;
+
+    border-radius: 7px;
+
+    margin-bottom: 8px;
+
+    font-size: 13px;
+}
+
+
+.question-name {
+
+    color: #93c5fd;
+
+    font-weight: bold;
+}
+
+
+.chat-input {
+
+    border-top:
+        1px solid #374151;
+
+    padding: 8px;
+
+    display: flex;
+
+    gap: 6px;
+}
+
+
+.chat-input input {
+
+    flex: 1;
+
+    min-width: 0;
+
+    background: #111827;
+
+    color: white;
+
+    border:
+        1px solid #4b5563;
+}
+
+
+.controlbar {
+
+    height: 72px;
+
+    flex-shrink: 0;
+
+    background: #1f2937;
+
+    border-top:
+        1px solid #374151;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 8px;
+}
+
+
+.control {
+
+    min-width: 55px;
+
+    height: 50px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #374151;
+
+    color: white;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: pointer;
+
+    font-size: 11px;
+}
+
+
+.control i {
+
+    font-size: 18px;
+
+    margin-bottom: 2px;
+}
+
+
+.control:hover {
+
+    background: #4b5563;
+}
+
+
+.end {
+
+    background: #dc2626;
+
+    min-width: 85px;
+}
+
+
+.end:hover {
+
+    background: #b91c1c;
+}
+
+
+.modal-content {
+
+    color: #111827;
+}
+
+
+@media(max-width:850px) {
+
+    .side {
+
+        width: 270px;
+    }
+
+}
+
+
+@media(max-width:650px) {
+
+    .side {
+
+        width: 220px;
+    }
+
+    .brand {
+
+        font-size: 17px;
+    }
+
+    .code-box {
+
+        display: none;
+    }
+
+    .control {
+
+        min-width: 45px;
+    }
+
+    .control span {
+
+        display: none;
+    }
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+<div id="leaveNotification" class="leave-notification"></div>
+
+
+<!-- =====================================================
+     START
+     ===================================================== -->
+
+<div id="startSection">
+
+    <div class="start-card">
+
+        <div class="text-center mb-3">
+
+            <i
+                class="bi bi-camera-video-fill text-primary"
+                style="font-size:45px;"
+            ></i>
+
+        </div>
+
+
+        <h3 class="text-center">
+
+            Start Webinar
+
+        </h3>
+
+
+        <p class="text-center text-muted">
+
+            Create your LiveConnect webinar.
+
+        </p>
+
+
+        <input
+            id="webinarTitleInput"
+            class="form-control mb-3"
+            placeholder="Webinar title"
+        >
+
+
+        <input
+            id="hostNameInput"
+            class="form-control mb-3"
+            placeholder="Host name"
+        >
+
+
+        <button
+            onclick="startWebinar()"
+            id="startButton"
+            class="btn btn-primary w-100"
+        >
+
+            <i class="bi bi-broadcast me-2"></i>
+
+            Start Webinar
+
+        </button>
+
+
+        <div
+            id="startMessage"
+            class="mt-3"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     HOST
+     ===================================================== -->
+
+<div
+    id="hostSection"
+    style="display:none;"
+>
+
+
+<header class="topbar">
+
+
+    <div class="brand">
+
+        <i class="bi bi-camera-video-fill"></i>
+
+        LiveConnect
+
+    </div>
+
+
+    <div class="header-right">
+
+
+        <div class="code-box">
+
+            <small>CODE</small>
+
+            <span
+                id="joinCodeDisplay"
+                class="code"
+            >
+                ------
+            </span>
+
+
+            <button
+                onclick="copyCode()"
+                class="copy-btn"
+            >
+
+                <i class="bi bi-copy"></i>
+
+            </button>
+
+        </div>
+
+
+        <span class="live">
+
+            ● LIVE
+
+        </span>
+
+
+        <span
+            id="connectionStatus"
+            class="badge bg-warning"
+        >
+
+            Connecting
+
+        </span>
+
+    </div>
+
+</header>
+
+
+<div class="main">
+
+
+    <!-- VIDEO AREA -->
+
+    <section
+        id="videoArea"
+        class="video-area"
+    >
+
+
+        <div
+            id="hostVideoTile"
+            class="video-tile"
+        >
+
+            <video
+                id="localVideo"
+                autoplay
+                muted
+                playsinline
+            ></video>
+
+
+            <div class="video-name">
+
+                <i class="bi bi-person-video3"></i>
+
+                Host
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- SIDE -->
+
+    <aside class="side">
+
+
+        <div class="tabs">
+
+
+            <button
+                id="peopleTab"
+                class="tab active"
+                onclick="showPanel('people')"
+            >
+
+                <i class="bi bi-people me-1"></i>
+
+                People
+
+            </button>
+
+
+            <button
+                id="chatTab"
+                class="tab"
+                onclick="showPanel('chat')"
+            >
+
+                <i class="bi bi-chat me-1"></i>
+
+                Chat
+
+            </button>
+
+
+            <button
+                id="pollTab"
+                class="tab"
+                onclick="showPanel('poll')"
+            >
+
+                <i class="bi bi-bar-chart me-1"></i>
+
+                Poll
+
+            </button>
+
+
+            <button
+                id="qaTab"
+                class="tab"
+                onclick="showPanel('qa')"
+            >
+
+                <i class="bi bi-question-circle me-1"></i>
+
+                Q&A
+
+            </button>
+
+        </div>
+
+
+        <!-- PEOPLE -->
+
+        <div
+            id="peoplePanel"
+            class="panel"
+        >
+
+            <div class="d-flex justify-content-between mb-3">
+
+                <span class="text-secondary">
+
+                    Participants
+
+                </span>
+
+
+                <span
+                    id="participantCount"
+                    class="badge bg-primary"
+                >
+                    0
+                </span>
+
+            </div>
+
+
+            <div id="participantList">
+
+                <div
+                    id="emptyParticipants"
+                    class="text-secondary text-center small"
+                >
+
+                    Waiting for participants...
+
+                </div>
+
+            </div>
+
+
+            <hr>
+
+
+            <div class="text-secondary small mb-2">
+
+                Live Reactions
+
+            </div>
+
+
+            <div id="reactionList">
+
+                <div
+                    id="emptyReactions"
+                    class="text-secondary text-center small"
+                >
+
+                    No reactions yet.
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHAT -->
+
+        <div
+            id="chatPanel"
+            class="panel"
+            style="display:none;"
+        >
+
+            <div id="chatList">
+
+                <div
+                    id="emptyChat"
+                    class="text-secondary text-center small"
+                >
+
+                    Waiting for messages...
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- POLL -->
+
+        <div
+            id="pollPanel"
+            class="panel"
+            style="display:none;"
+        >
+
+
+            <h6>
+
+                Create Live Poll
+
+            </h6>
+
+
+            <input
+                id="pollQuestionInput"
+                class="form-control mb-2"
+                placeholder="Poll question"
+            >
+
+
+            <input
+                id="pollOption1"
+                class="form-control mb-2"
+                placeholder="Option 1"
+            >
+
+
+            <input
+                id="pollOption2"
+                class="form-control mb-2"
+                placeholder="Option 2"
+            >
+
+
+            <input
+                id="pollOption3"
+                class="form-control mb-2"
+                placeholder="Option 3 (optional)"
+            >
+
+
+            <input
+                id="pollOption4"
+                class="form-control mb-2"
+                placeholder="Option 4 (optional)"
+            >
+
+
+            <button
+                onclick="createPoll()"
+                class="btn btn-primary w-100 mb-3"
+            >
+
+                <i class="bi bi-bar-chart me-1"></i>
+
+                Create Poll
+
+            </button>
+
+
+            <hr>
+
+
+            <div
+                id="pollResults"
+                class="small"
+            >
+
+                Poll results will appear here.
+
+            </div>
+
+        </div>
+
+
+        <!-- Q&A -->
+
+        <div
+            id="qaPanel"
+            class="panel"
+            style="display:none;"
+        >
+
+            <h6>
+
+                Questions from Participants
+
+            </h6>
+
+
+            <div id="questionList">
+
+                <div
+                    id="emptyQuestions"
+                    class="text-secondary text-center small"
+                >
+
+                    No questions yet.
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHAT INPUT -->
+
+        <div
+            id="chatInputArea"
+            class="chat-input"
+        >
+
+            <input
+                id="chatMessage"
+                type="text"
+                placeholder="Type a message..."
+                onkeydown="handleChatKey(event)"
+            >
+
+
+            <button
+                onclick="sendChat()"
+                class="btn btn-primary btn-sm"
+            >
+
+                <i class="bi bi-send"></i>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+</div>
+
+
+<!-- CONTROL BAR -->
+
+<footer class="controlbar">
+
+
+    <button
+        id="muteButton"
+        class="control"
+        onclick="toggleMute()"
+    >
+
+        <i
+            id="muteIcon"
+            class="bi bi-mic"
+        ></i>
+
+        <span id="muteText">
+            Mute
+        </span>
+
+    </button>
+
+
+    <button
+        id="videoButton"
+        class="control"
+        onclick="toggleCamera()"
+    >
+
+        <i
+            id="cameraIcon"
+            class="bi bi-camera-video"
+        ></i>
+
+        <span id="cameraText">
+            Video
+        </span>
+
+    </button>
+
+
+    <button
+        id="screenButton"
+        class="control"
+        onclick="toggleScreenShare()"
+    >
+
+        <i class="bi bi-display"></i>
+
+        <span>
+            Share
+        </span>
+
+    </button>
+
+
+    <button
+        class="control"
+        onclick="showPanel('people')"
+    >
+
+        <i class="bi bi-people"></i>
+
+        <span>
+            People
+        </span>
+
+    </button>
+
+
+    <button
+        class="control"
+        onclick="showPanel('chat')"
+    >
+
+        <i class="bi bi-chat"></i>
+
+        <span>
+            Chat
+        </span>
+
+    </button>
+
+
+    <button
+        class="control"
+        onclick="showPanel('poll')"
+    >
+
+        <i class="bi bi-bar-chart"></i>
+
+        <span>
+            Poll
+        </span>
+
+    </button>
+
+
+    <button
+        class="control"
+        onclick="showPanel('qa')"
+    >
+
+        <i class="bi bi-question-circle"></i>
+
+        <span>
+            Q&A
+        </span>
+
+    </button>
+
+
+    <button
+        onclick="endWebinar()"
+        class="control end"
+    >
+
+        <i class="bi bi-telephone-x"></i>
+
+        <span>
+            End
+        </span>
+
+    </button>
+
+</footer>
+
+
+</div>
+
+
+<script>
+
+
+
+// =====================================================
+// VARIABLES
+// =====================================================
+
+let webinarId = null;
+
+// PHP signaling server
+const PHP_BASE_URL = "http://localhost/liveconnect-api";
+
+let webinarJoinCode = null;
+
+let localStream = null;
+
+let screenStream = null;
+
+let peerConnections = {};
+
+let participantNames = {};
+
+let cameraEnabled = true;
+
+let microphoneEnabled = true;
+
+
+const rtcConfiguration = {
+
+    iceServers: [
+
+        {
+            urls:
+                "stun:stun.l.google.com:19302"
+        }
+
+    ]
+
+};
+
+
+// =====================================================
+// START WEBINAR
+// =====================================================
+
+async function startWebinar() {
+
+
+    const title =
+        document
+            .getElementById(
+                "webinarTitleInput"
+            )
+            .value.trim();
+
+
+    const hostName =
+        document
+            .getElementById(
+                "hostNameInput"
+            )
+            .value.trim();
+
+
+    if (
+        !title ||
+        !hostName
+    ) {
+
+        document
+            .getElementById(
+                "startMessage"
+            )
+            .innerHTML =
+            `<div class="alert alert-warning">
+                Enter title and host name.
+            </div>`;
+
+        return;
+
+    }
+
+
+    const button =
+        document.getElementById(
+            "startButton"
+        );
+
+
+    button.disabled = true;
+
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "title",
+        title
+    );
+
+
+    formData.append(
+        "host_name",
+        hostName
+    );
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                `${PHP_BASE_URL}/create_webinar.php`,
+                {
+                    method:
+                        "POST",
+
+                    body:
+                        formData
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to create webinar."
+            );
+
+        }
+
+
+        webinarId =
+            data.webinar_id;
+
+
+        webinarJoinCode =
+            data.join_code;
+
+
+        document
+            .getElementById(
+                "joinCodeDisplay"
+            )
+            .textContent =
+            webinarJoinCode;
+
+
+        document
+            .getElementById(
+                "startSection"
+            )
+            .style.display =
+            "none";
+
+
+        document
+            .getElementById(
+                "hostSection"
+            )
+            .style.display =
+            "flex";
+
+
+        await startCamera();
+
+
+        connectPHPPolling();
+
+
+    }
+
+    catch (error) {
+
+        button.disabled = false;
+
+
+        document
+            .getElementById(
+                "startMessage"
+            )
+            .innerHTML =
+            `<div class="alert alert-danger">
+                ${escapeHtml(error.message)}
+            </div>`;
+
+    }
+
+}
+
+
+// =====================================================
+// CAMERA + MICROPHONE
+// =====================================================
+
+async function startCamera() {
+
+
+    localStream =
+        await navigator.mediaDevices.getUserMedia({
+
+            video: true,
+
+            audio: true
+
+        });
+
+
+    document
+        .getElementById(
+            "localVideo"
+        )
+        .srcObject =
+        localStream;
+
+}
+
+
+function sendSignal(data) {
+
+    if (!webinarId) {
+        return Promise.resolve(null);
+    }
+
+    return fetch(
+        `${PHP_BASE_URL}/signal.php`,
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                webinar_id: webinarId,
+
+                sender_id: "host",
+
+                ...data
+            })
+        }
+    )
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+
+        if (!data.success) {
+            console.error(
+                "PHP signal error:",
+                data.message
+            );
+        }
+
+        return data;
+
+    })
+    .catch(function(error) {
+
+        console.error(
+            "PHP signal request failed:",
+            error
+        );
+
+        return null;
+
+    });
+
+}
+
+
+let lastSignalTimestamp = 0;
+
+let phpPollingTimer = null;
+
+let phpPollingRunning = false;
+
+
+function connectPHPPolling() {
+
+    const status =
+        document.getElementById(
+            "connectionStatus"
+        );
+
+    status.className =
+        "badge bg-warning";
+
+    status.textContent =
+        "PHP Connecting...";
+
+    lastSignalTimestamp = 0;
+
+    if (phpPollingTimer) {
+        clearInterval(phpPollingTimer);
+    }
+
+    pollPHPSignals();
+
+    phpPollingTimer =
+        setInterval(
+            pollPHPSignals,
+            300
+        );
+
+}
+
+
+async function pollPHPSignals() {
+
+    if (
+        phpPollingRunning ||
+        !webinarId
+    ) {
+
+        return;
+
+    }
+
+    phpPollingRunning = true;
+
+    try {
+
+        const response =
+            await fetch(
+                `${PHP_BASE_URL}/poll.php?webinar_id=${encodeURIComponent(webinarId)}&receiver_id=host&after=${encodeURIComponent(lastSignalTimestamp)}`,
+                {
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                `PHP poll HTTP ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        if (!data.success) {
+            throw new Error(
+                data.message ||
+                "PHP polling failed."
+            );
+        }
+
+        if (
+            typeof data.timestamp ===
+            "number"
+        ) {
+
+            lastSignalTimestamp =
+                Math.max(
+                    lastSignalTimestamp,
+                    data.timestamp
+                );
+
+        }
+
+        const signals =
+            data.signals || [];
+
+        for (
+            const signal
+            of signals
+        ) {
+
+            await handlePHPSignal(
+                signal
+            );
+
+        }
+
+        const status =
+            document.getElementById(
+                "connectionStatus"
+            );
+
+        status.className =
+            "badge bg-success";
+
+        status.textContent =
+            "PHP Connected 🟢";
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "PHP polling:",
+            error
+        );
+
+        const status =
+            document.getElementById(
+                "connectionStatus"
+            );
+
+        status.className =
+            "badge bg-warning";
+
+        status.textContent =
+            "PHP Reconnecting...";
+
+    }
+
+    finally {
+
+        phpPollingRunning =
+            false;
+
+    }
+
+}
+
+
+async function handlePHPSignal(data) {
+
+    if (!data || !data.type) {
+        return;
+    }
+
+
+    // ==========================================
+    // PARTICIPANT JOINED
+    // ==========================================
+
+    if (
+        data.type ===
+        "participant_joined"
+    ) {
+
+        participantNames[
+            data.participant_id
+        ] =
+            data.participant_name;
+
+        addParticipant(
+            data.participant_id,
+            data.participant_name
+        );
+
+        updateParticipantCount(
+            data.participant_count !== undefined
+                ? data.participant_count
+                : Object.keys(participantNames).length
+        );
+
+        // Start the WebRTC offer as soon as the host
+        // knows that this participant has joined.
+        // This removes the dependency on a separate
+        // participant_ready signal reaching the host.
+        await createPeerConnectionForParticipant(
+            data.participant_id
+        );
+
+    }
+
+
+    // ==========================================
+    // PARTICIPANT READY
+    // ==========================================
+
+    if (
+        data.type ===
+        "participant_ready" &&
+        data.role ===
+        "participant"
+    ) {
+
+        participantNames[
+            data.participant_id
+        ] =
+            data.participant_name ||
+            participantNames[
+                data.participant_id
+            ] ||
+            "Participant";
+
+        addParticipant(
+            data.participant_id,
+            participantNames[
+                data.participant_id
+            ]
+        );
+
+        updateParticipantCount(
+            data.participant_count !== undefined
+                ? data.participant_count
+                : Object.keys(participantNames).length
+        );
+
+        await createPeerConnectionForParticipant(
+            data.participant_id
+        );
+
+    }
+
+
+    // ==========================================
+    // WEBRTC ANSWER FROM PARTICIPANT
+    // ==========================================
+
+    if (
+        data.type ===
+        "webrtc_answer" &&
+        data.role ===
+        "participant" &&
+        data.target_role ===
+        "host"
+    ) {
+
+        const id =
+            Number(
+                data.participant_id
+            );
+
+        const pc =
+            peerConnections[id];
+
+        if (
+            pc &&
+            data.answer
+        ) {
+
+            try {
+
+                await pc.setRemoteDescription(
+                    new RTCSessionDescription(
+                        data.answer
+                    )
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Host answer error:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+    // ==========================================
+    // WEBRTC ICE FROM PARTICIPANT
+    // ==========================================
+
+    if (
+        data.type ===
+        "webrtc_ice" &&
+        data.role ===
+        "participant" &&
+        data.target_role ===
+        "host"
+    ) {
+
+        const id =
+            Number(
+                data.participant_id
+            );
+
+        const pc =
+            peerConnections[id];
+
+        if (
+            pc &&
+            data.candidate
+        ) {
+
+            try {
+
+                await pc.addIceCandidate(
+                    new RTCIceCandidate(
+                        data.candidate
+                    )
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Host ICE:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+    // ==========================================
+    // PARTICIPANT LEFT
+    // ==========================================
+
+    if (
+        data.type ===
+        "participant_left"
+    ) {
+
+        const id =
+            Number(
+                data.participant_id
+            );
+
+        const name =
+            data.participant_name ||
+            "Participant";
+
+        delete participantNames[id];
+
+        removeParticipantVideo(id);
+
+        removeParticipant(id);
+
+        updateParticipantCount(
+            data.participant_count !== undefined
+                ? data.participant_count
+                : Object.keys(participantNames).length
+        );
+
+        showLeaveNotification(
+            `${name} left the webinar`
+        );
+
+    }
+
+
+    // ==========================================
+    // REACTION
+    // ==========================================
+
+    if (
+        data.type ===
+        "reaction"
+    ) {
+
+        addReaction(
+            data.participant_name,
+            data.reaction
+        );
+
+        showFloatingReaction(
+            data.reaction
+        );
+
+    }
+
+
+    // ==========================================
+    // CHAT
+    // ==========================================
+
+    if (
+        data.type ===
+        "chat_message"
+    ) {
+
+        addChatMessage(
+            data.participant_name,
+            data.message,
+            data.message_id || null
+        );
+
+    }
+
+
+    // ==========================================
+    // POLL CREATED
+    // ==========================================
+
+    if (
+        data.type ===
+        "poll_created"
+    ) {
+
+        showPollCreated(
+            data
+        );
+
+    }
+
+
+    // ==========================================
+    // POLL VOTE
+    // ==========================================
+
+    if (
+        data.type ===
+        "poll_vote"
+    ) {
+
+        showPollVote(
+            data
+        );
+
+    }
+
+
+    // ==========================================
+    // QUESTION
+    // ==========================================
+
+    if (
+        data.type ===
+        "question"
+    ) {
+
+        addQuestion(
+            data
+        );
+
+    }
+
+
+    // ==========================================
+    // QUESTION ANSWERED
+    // ==========================================
+
+    if (
+        data.type ===
+        "question_answered"
+    ) {
+
+        const element =
+            document.querySelector(
+                `[data-question-id="${data.question_id}"]`
+            );
+
+        if (element) {
+
+            element.classList.add(
+                "opacity-50",
+                "border",
+                "border-success"
+            );
+
+            const status =
+                element.querySelector(
+                    ".question-status"
+                );
+
+            if (status) {
+
+                status.textContent =
+                    "Answered ✓";
+
+                status.classList.remove(
+                    "text-secondary"
+                );
+
+                status.classList.add(
+                    "text-success"
+                );
+
+            }
+
+            const button =
+                element.querySelector(
+                    "button"
+                );
+
+            if (button) {
+
+                button.disabled =
+                    true;
+
+                button.textContent =
+                    "Answered ✓";
+
+                button.classList.remove(
+                    "btn-success"
+                );
+
+                button.classList.add(
+                    "btn-secondary"
+                );
+
+            }
+
+        }
+
+    }
+
+}
+
+async function createPeerConnectionForParticipant(
+    participantId
+) {
+
+    if (
+        peerConnections[
+            participantId
+        ]
+    ) {
+
+        return peerConnections[
+            participantId
+        ];
+
+    }
+
+    const pc =
+        new RTCPeerConnection(
+            rtcConfiguration
+        );
+
+    peerConnections[
+        participantId
+    ] =
+        pc;
+
+    // -------------------------------------------------
+    // HOST CAMERA + MICROPHONE
+    // -------------------------------------------------
+
+    if (localStream) {
+
+        localStream
+            .getTracks()
+            .forEach(
+                function(track) {
+
+                    pc.addTrack(
+                        track,
+                        localStream
+                    );
+
+                }
+            );
+
+    }
+
+    // -------------------------------------------------
+    // RECEIVE PARTICIPANT CAMERA + MICROPHONE
+    // -------------------------------------------------
+
+    pc.ontrack =
+        function(event) {
+
+            if (
+                !event.streams ||
+                !event.streams[0]
+            ) {
+
+                return;
+
+            }
+
+            createParticipantVideo(
+                participantId,
+                participantNames[
+                    participantId
+                ] ||
+                "Participant",
+                event.streams[0]
+            );
+
+        };
+
+    // -------------------------------------------------
+    // ICE
+    // -------------------------------------------------
+
+    pc.onicecandidate =
+        function(event) {
+
+            if (event.candidate) {
+
+                sendSignal({
+
+                    type:
+                        "webrtc_ice",
+
+                    role:
+                        "host",
+
+                    target_role:
+                        "participant",
+
+                    participant_id:
+                        participantId,
+
+                    candidate:
+                        event.candidate
+
+                });
+
+            }
+
+        };
+
+    pc.onconnectionstatechange =
+        function() {
+
+            console.log(
+                "Host -> Participant",
+                participantId,
+                "WebRTC:",
+                pc.connectionState
+            );
+
+            if (
+                pc.connectionState ===
+                "failed" ||
+
+                pc.connectionState ===
+                "closed" ||
+
+                pc.connectionState ===
+                "disconnected"
+            ) {
+
+                removeParticipantVideo(
+                    participantId
+                );
+
+            }
+
+        };
+
+    try {
+
+        const offer =
+            await pc.createOffer();
+
+        await pc.setLocalDescription(
+            offer
+        );
+
+        await sendSignal({
+
+            type:
+                "webrtc_offer",
+
+            role:
+                "host",
+
+            target_role:
+                "participant",
+
+            participant_id:
+                participantId,
+
+            offer:
+                pc.localDescription
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Host offer error:",
+            error
+        );
+
+    }
+
+    return pc;
+
+}
+
+function createParticipantVideo(
+    participantId,
+    name,
+    stream
+) {
+
+    let tile =
+        document.getElementById(
+            `participant-video-${participantId}`
+        );
+
+    if (!tile) {
+
+        tile =
+            document.createElement(
+                "div"
+            );
+
+        tile.className =
+            "video-tile";
+
+        tile.id =
+            `participant-video-${participantId}`;
+
+        tile.innerHTML =
+            `
+            <video
+                autoplay
+                playsinline
+            ></video>
+
+            <div class="video-name">
+
+                <i class="bi bi-person"></i>
+
+                ${escapeHtml(name)}
+
+            </div>
+            `;
+
+        document
+            .getElementById(
+                "videoArea"
+            )
+            .appendChild(
+                tile
+            );
+
+    }
+
+    const video =
+        tile.querySelector(
+            "video"
+        );
+
+    if (
+        video.srcObject !==
+        stream
+    ) {
+
+        video.srcObject =
+            stream;
+
+        video.play().catch(
+            function() {}
+        );
+
+    }
+
+}
+
+function removeParticipantVideo(
+    participantId
+) {
+
+    const tile =
+        document.getElementById(
+            `participant-video-${participantId}`
+        );
+
+    if (tile) {
+
+        tile.remove();
+
+    }
+
+    if (
+        peerConnections[
+            participantId
+        ]
+    ) {
+
+        peerConnections[
+            participantId
+        ].close();
+
+    }
+
+    delete peerConnections[
+        participantId
+    ];
+
+}
+
+function removeParticipant(
+    participantId
+) {
+
+    const item =
+        document.querySelector(
+            `[data-participant-id="${participantId}"]`
+        );
+
+    if (item) {
+
+        item.remove();
+
+    }
+
+    const list =
+        document.getElementById(
+            "participantList"
+        );
+
+    if (
+        list &&
+        !list.querySelector(
+            ".participant-item"
+        )
+    ) {
+
+        if (!document.getElementById("emptyParticipants")) {
+
+            const empty =
+                document.createElement("div");
+
+            empty.id =
+                "emptyParticipants";
+
+            empty.className =
+                "text-secondary text-center small";
+
+            empty.textContent =
+                "Waiting for participants...";
+
+            list.appendChild(empty);
+
+        }
+
+    }
+
+}
+
+
+function showLeaveNotification(
+    message
+) {
+
+    const notification =
+        document.getElementById(
+            "leaveNotification"
+        );
+
+    if (!notification) {
+
+        return;
+
+    }
+
+    notification.textContent =
+        `🔔 ${message}`;
+
+    notification.classList.add("show");
+
+    clearTimeout(
+        window.leaveNotificationTimer
+    );
+
+    window.leaveNotificationTimer =
+        setTimeout(
+            function() {
+
+                notification.classList.remove(
+                    "show"
+                );
+
+            },
+            3000
+        );
+
+}
+
+
+// =====================================================
+// PARTICIPANT COUNT
+// =====================================================
+
+function updateParticipantCount(
+    count
+) {
+
+
+    document
+        .getElementById(
+            "participantCount"
+        )
+        .textContent =
+        count || 0;
+
+}
+
+
+// =====================================================
+// PARTICIPANT LIST
+// =====================================================
+
+function addParticipant(
+    id,
+    name
+) {
+
+
+    const list =
+        document.getElementById(
+            "participantList"
+        );
+
+
+    if (
+        list.querySelector(
+            `[data-participant-id="${id}"]`
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const empty =
+        document.getElementById(
+            "emptyParticipants"
+        );
+
+
+    if (empty) {
+
+        empty.remove();
+
+    }
+
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+
+    item.className =
+        "participant-item";
+
+
+    item.dataset.participantId =
+        id;
+
+
+    item.innerHTML =
+
+        `
+        <span>
+
+            <i class="bi bi-person-circle text-primary me-1"></i>
+
+            ${escapeHtml(name)}
+
+        </span>
+
+        <span class="badge bg-success">
+
+            Online
+
+        </span>
+        `;
+
+
+    list.appendChild(
+        item
+    );
+
+}
+
+
+// =====================================================
+// CHAT
+// =====================================================
+
+async function sendChat() {
+
+
+    const input =
+        document.getElementById(
+            "chatMessage"
+        );
+
+
+    const message =
+        input.value.trim();
+
+
+    if (!message) {
+
+        return;
+
+    }
+
+
+    const result =
+        await sendSignal({
+
+            type:
+                "chat_message",
+
+            participant_name:
+                "Host",
+
+            message:
+                message
+
+        });
+
+    if (
+        result &&
+        result.success
+    ) {
+
+        addChatMessage(
+            "Host",
+            message
+        );
+
+        input.value =
+            "";
+
+    }
+
+}
+
+
+function handleChatKey(
+    event
+) {
+
+
+    if (
+        event.key ===
+        "Enter"
+    ) {
+
+        sendChat();
+
+    }
+
+}
+
+
+// =====================================================
+// CHAT DISPLAY
+// =====================================================
+
+function addChatMessage(
+    name,
+    message,
+    messageId = null
+) {
+
+    const list =
+        document.getElementById(
+            "chatList"
+        );
+
+    const empty =
+        document.getElementById(
+            "emptyChat"
+        );
+
+    if (messageId) {
+
+        const existing =
+            list.querySelector(
+                `[data-message-id="${messageId}"]`
+            );
+
+        if (existing) {
+            return;
+        }
+
+    }
+
+    if (empty) {
+        empty.remove();
+    }
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+    item.className =
+        "chat-message";
+
+    if (messageId) {
+        item.dataset.messageId =
+            messageId;
+    }
+
+    item.innerHTML =
+        `
+        <div class="chat-name">
+            ${escapeHtml(name)}
+        </div>
+
+        <div class="chat-text">
+            ${escapeHtml(message)}
+        </div>
+        `;
+
+    list.appendChild(
+        item
+    );
+
+    list.scrollTop =
+        list.scrollHeight;
+
+}
+
+
+// =====================================================
+// REACTION
+// =====================================================
+
+function addReaction(
+    name,
+    reaction
+) {
+
+
+    const list =
+        document.getElementById(
+            "reactionList"
+        );
+
+
+    const empty =
+        document.getElementById(
+            "emptyReactions"
+        );
+
+
+    if (empty) {
+
+        empty.remove();
+
+    }
+
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+
+    item.className =
+        "participant-item";
+
+
+    item.innerHTML =
+
+        `
+        <span>
+
+            ${reaction}
+
+            ${escapeHtml(name)}
+
+        </span>
+
+        <small>
+
+            reaction
+
+        </small>
+        `;
+
+
+    list.prepend(
+        item
+    );
+
+}
+
+
+function showFloatingReaction(
+    reaction
+) {
+
+
+    const area =
+        document.getElementById(
+            "videoArea"
+        );
+
+
+    const emoji =
+        document.createElement(
+            "div"
+        );
+
+
+    emoji.className =
+        "floating-reaction";
+
+
+    emoji.textContent =
+        reaction;
+
+
+    area.appendChild(
+        emoji
+    );
+
+
+    setTimeout(
+        function() {
+
+            emoji.remove();
+
+        },
+        2100
+    );
+
+}
+
+
+// =====================================================
+// POLL CREATION
+// =====================================================
+
+async function createPoll() {
+
+
+    const question =
+        document
+            .getElementById(
+                "pollQuestionInput"
+            )
+            .value
+            .trim();
+
+
+    const options = [
+
+        document
+            .getElementById(
+                "pollOption1"
+            )
+            .value
+            .trim(),
+
+        document
+            .getElementById(
+                "pollOption2"
+            )
+            .value
+            .trim(),
+
+        document
+            .getElementById(
+                "pollOption3"
+            )
+            .value
+            .trim(),
+
+        document
+            .getElementById(
+                "pollOption4"
+            )
+            .value
+            .trim()
+
+    ].filter(
+        Boolean
+    );
+
+
+    if (
+        !question ||
+        options.length < 2
+    ) {
+
+        alert(
+            "Enter a question and at least two options."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+
+        const response =
+            await fetch(
+
+                `${PHP_BASE_URL}/create_poll.php?webinar_id=${encodeURIComponent(webinarId)}`,
+
+                {
+
+                    method:
+                        "POST",
+
+                    headers:
+                        {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                    body:
+                        JSON.stringify({
+
+                            question:
+                                question,
+
+                            options:
+                                options
+
+                        })
+
+                }
+
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !data.success
+        ) {
+
+            alert(
+                data.message
+            );
+
+            return;
+
+        }
+
+
+        document
+            .getElementById(
+                "pollQuestionInput"
+            )
+            .value =
+            "";
+
+
+        options.forEach(
+            function(_, index) {
+
+                document
+                    .getElementById(
+                        `pollOption${index + 1}`
+                    )
+                    .value =
+                    "";
+
+            }
+        );
+
+
+        showPollCreated(
+            data
+        );
+
+        await sendSignal({
+
+            type:
+                "poll_created",
+
+            poll_id:
+                data.poll_id,
+
+            question:
+                data.question || question,
+
+            options:
+                data.options || []
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+        alert(
+            "Unable to create poll."
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// POLL DISPLAY
+// =====================================================
+
+function showPollCreated(
+    data
+) {
+
+
+    const results =
+        document.getElementById(
+            "pollResults"
+        );
+
+
+    results.innerHTML =
+
+        `
+        <div class="alert alert-info">
+
+            <strong>
+                ${escapeHtml(data.question)}
+            </strong>
+
+            <br>
+
+            Poll is live.
+
+        </div>
+        `;
+
+
+    showPanel(
+        "poll"
+    );
+
+}
+
+
+function showPollVote(
+    data
+) {
+
+
+    const results =
+        document.getElementById(
+            "pollResults"
+        );
+
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+
+    item.className =
+        "small mb-1";
+
+
+    item.textContent =
+
+        `${data.participant_name} voted. Total: ${data.vote_count}`;
+
+
+    results.appendChild(
+        item
+    );
+
+}
+
+
+// =====================================================
+// Q&A
+// =====================================================
+
+function addQuestion(
+    data
+) {
+
+    const list =
+        document.getElementById(
+            "questionList"
+        );
+
+    const empty =
+        document.getElementById(
+            "emptyQuestions"
+        );
+
+    if (
+        data.question_id &&
+        list.querySelector(
+            `[data-question-id="${data.question_id}"]`
+        )
+    ) {
+
+        return;
+
+    }
+
+    if (empty) {
+        empty.remove();
+    }
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+    item.className =
+        "question";
+
+    item.dataset.questionId =
+        data.question_id;
+
+    item.innerHTML =
+        `
+        <div class="d-flex justify-content-between align-items-start">
+
+            <div class="question-name">
+                ${escapeHtml(data.participant_name)}
+            </div>
+
+            <span class="question-status text-secondary small">
+                Pending
+            </span>
+
+        </div>
+
+        <div class="mb-2">
+            ${escapeHtml(data.question)}
+        </div>
+
+        <button
+            class="btn btn-sm btn-success"
+            onclick="answerQuestion(${data.question_id})"
+        >
+            Mark Answered
+        </button>
+        `;
+
+    list.prepend(
+        item
+    );
+
+    showPanel(
+        "qa"
+    );
+
+}
+
+
+async function answerQuestion(
+    questionId
+) {
+
+
+    try {
+
+
+        const response =
+            await fetch(
+
+                `${PHP_BASE_URL}/answer_question.php?question_id=${encodeURIComponent(questionId)}`,
+
+                {
+                    method:
+                        "POST"
+                }
+
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            alert(
+                data.message
+            );
+
+            return;
+
+        }
+
+        const element =
+            document.querySelector(
+                `[data-question-id="${questionId}"]`
+            );
+
+        if (element) {
+
+            element.classList.add(
+                "opacity-50",
+                "border",
+                "border-success"
+            );
+
+            const status =
+                element.querySelector(
+                    ".question-status"
+                );
+
+            if (status) {
+
+                status.textContent =
+                    "Answered ✓";
+
+                status.classList.remove(
+                    "text-secondary"
+                );
+
+                status.classList.add(
+                    "text-success"
+                );
+
+            }
+
+            const button =
+                element.querySelector(
+                    "button"
+                );
+
+            if (button) {
+
+                button.disabled =
+                    true;
+
+                button.textContent =
+                    "Answered ✓";
+
+                button.classList.remove(
+                    "btn-success"
+                );
+
+                button.classList.add(
+                    "btn-secondary"
+                );
+
+            }
+
+        }
+
+        const signalResult =
+            await sendSignal({
+
+                type:
+                    "question_answered",
+
+                question_id:
+                    questionId
+
+            });
+
+        if (
+            !signalResult ||
+            !signalResult.success
+        ) {
+
+            console.error(
+                "Question answered signal failed:",
+                signalResult
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// SCREEN SHARE
+// =====================================================
+
+async function toggleScreenShare() {
+
+
+    if (
+        screenStream
+    ) {
+
+        stopScreenShare();
+
+        return;
+
+    }
+
+
+    try {
+
+
+        screenStream =
+            await navigator.mediaDevices.getDisplayMedia({
+
+                video: true,
+
+                audio: true
+
+            });
+
+
+        const screenTrack =
+            screenStream.getVideoTracks()[0];
+
+
+        Object.values(
+            peerConnections
+        ).forEach(
+            function(pc) {
+
+
+                const sender =
+                    pc
+                        .getSenders()
+                        .find(
+                            function(sender) {
+
+                                return (
+                                    sender.track &&
+                                    sender.track.kind ===
+                                    "video"
+                                );
+
+                            }
+                        );
+
+
+                if (sender) {
+
+                    sender.replaceTrack(
+                        screenTrack
+                    );
+
+                }
+
+            }
+        );
+
+
+        document
+            .getElementById(
+                "localVideo"
+            )
+            .srcObject =
+            screenStream;
+
+
+        screenTrack.onended =
+            function() {
+
+                stopScreenShare();
+
+            };
+
+
+        document
+            .getElementById(
+                "screenButton"
+            )
+            .classList.add(
+                "btn-primary"
+            );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Screen share:",
+            error
+        );
+
+    }
+
+}
+
+
+function stopScreenShare() {
+
+
+    if (!screenStream) {
+
+        return;
+
+    }
+
+
+    screenStream
+        .getTracks()
+        .forEach(
+            function(track) {
+
+                track.stop();
+
+            }
+        );
+
+
+    const cameraTrack =
+        localStream
+            .getVideoTracks()[0];
+
+
+    Object.values(
+        peerConnections
+    ).forEach(
+        function(pc) {
+
+
+            const sender =
+                pc
+                    .getSenders()
+                    .find(
+                        function(sender) {
+
+                            return (
+                                sender.track &&
+                                sender.track.kind ===
+                                "video"
+                            );
+
+                        }
+                    );
+
+
+            if (
+                sender &&
+                cameraTrack
+            ) {
+
+                sender.replaceTrack(
+                    cameraTrack
+                );
+
+            }
+
+        }
+    );
+
+
+    document
+        .getElementById(
+            "localVideo"
+        )
+        .srcObject =
+        localStream;
+
+
+    screenStream =
+        null;
+
+}
+
+
+// =====================================================
+// MUTE
+// =====================================================
+
+function toggleMute() {
+
+
+    if (!localStream) {
+
+        return;
+
+    }
+
+
+    localStream
+        .getAudioTracks()
+        .forEach(
+            function(track) {
+
+                track.enabled =
+                    !track.enabled;
+
+                microphoneEnabled =
+                    track.enabled;
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "muteIcon"
+        )
+        .className =
+        microphoneEnabled
+            ? "bi bi-mic"
+            : "bi bi-mic-mute";
+
+
+    document
+        .getElementById(
+            "muteText"
+        )
+        .textContent =
+        microphoneEnabled
+            ? "Mute"
+            : "Unmute";
+
+}
+
+
+// =====================================================
+// CAMERA
+// =====================================================
+
+function toggleCamera() {
+
+
+    if (!localStream) {
+
+        return;
+
+    }
+
+
+    localStream
+        .getVideoTracks()
+        .forEach(
+            function(track) {
+
+                track.enabled =
+                    !track.enabled;
+
+                cameraEnabled =
+                    track.enabled;
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "cameraIcon"
+        )
+        .className =
+        cameraEnabled
+            ? "bi bi-camera-video"
+            : "bi bi-camera-video-off";
+
+
+    document
+        .getElementById(
+            "cameraText"
+        )
+        .textContent =
+        cameraEnabled
+            ? "Video"
+            : "Start Video";
+
+}
+
+
+// =====================================================
+// PANELS
+// =====================================================
+
+function showPanel(
+    panel
+) {
+
+
+    const panels = {
+
+        people:
+            document.getElementById(
+                "peoplePanel"
+            ),
+
+        chat:
+            document.getElementById(
+                "chatPanel"
+            ),
+
+        poll:
+            document.getElementById(
+                "pollPanel"
+            ),
+
+        qa:
+            document.getElementById(
+                "qaPanel"
+            )
+
+    };
+
+
+    const tabs = {
+
+        people:
+            document.getElementById(
+                "peopleTab"
+            ),
+
+        chat:
+            document.getElementById(
+                "chatTab"
+            ),
+
+        poll:
+            document.getElementById(
+                "pollTab"
+            ),
+
+        qa:
+            document.getElementById(
+                "qaTab"
+            )
+
+    };
+
+
+    Object.values(
+        panels
+    ).forEach(
+        function(element) {
+
+            element.style.display =
+                "none";
+
+        }
+    );
+
+
+    Object.values(
+        tabs
+    ).forEach(
+        function(element) {
+
+            element.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    panels[
+        panel
+    ].style.display =
+        "block";
+
+
+    tabs[
+        panel
+    ].classList.add(
+        "active"
+    );
+
+
+    document
+        .getElementById(
+            "chatInputArea"
+        )
+        .style.display =
+        panel === "chat"
+            ? "flex"
+            : "none";
+
+}
+
+
+// =====================================================
+// COPY
+// =====================================================
+
+async function copyCode() {
+
+
+    await navigator.clipboard.writeText(
+        webinarJoinCode
+    );
+
+
+    alert(
+        "Webinar code copied!"
+    );
+
+}
+
+
+// =====================================================
+// END
+// =====================================================
+
+async function endWebinar() {
+
+
+    Object.values(
+        peerConnections
+    ).forEach(
+        function(pc) {
+
+            pc.close();
+
+        }
+    );
+
+
+    if (localStream) {
+
+        localStream
+            .getTracks()
+            .forEach(
+                function(track) {
+
+                    track.stop();
+
+                }
+            );
+
+    }
+
+
+    if (phpPollingTimer) {
+
+        clearInterval(
+            phpPollingTimer
+        );
+
+        phpPollingTimer =
+            null;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${PHP_BASE_URL}/end_webinar.php`,
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded; charset=UTF-8"
+                    },
+
+                    body:
+                        new URLSearchParams({
+                            webinar_id:
+                                webinarId
+                        }).toString()
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to end webinar."
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "End webinar:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Unable to end webinar."
+        );
+
+        return;
+
+    }
+
+
+    window.location.href =
+        `/liveconnect/analytics.html?webinar_id=${encodeURIComponent(webinarId)}`;
+
+}
+
+
+// =====================================================
+// ESCAPE HTML
+// =====================================================
+
+function escapeHtml(
+    value
+) {
+
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        value ?? "";
+
+
+    return div.innerHTML;
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
