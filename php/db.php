@@ -3,21 +3,76 @@
 /*
  * LiveConnect MySQL database connection.
  *
- * Database:
- *     liveconnect
+ * Production:
+ *     Uses Railway public MySQL URL from Render.
  *
- * MySQL:
- *     localhost:3306
- *
- * User:
- *     root
+ * Local:
+ *     Falls back to local XAMPP MySQL.
  */
 
-$DB_HOST = getenv("DB_HOST") ?: "127.0.0.1";
-$DB_PORT = (int)(getenv("DB_PORT") ?: 3306);
-$DB_NAME = getenv("DB_NAME") ?: "liveconnect";
-$DB_USER = getenv("DB_USER") ?: "root";
-$DB_PASS = getenv("DB_PASS") ?: "";
+$DB_PUBLIC_URL =
+    getenv("DB_PUBLIC_URL");
+
+$DB_HOST =
+    getenv("DB_HOST") ?: "127.0.0.1";
+
+$DB_PORT =
+    (int)(getenv("DB_PORT") ?: 3306);
+
+$DB_NAME =
+    getenv("DB_NAME") ?: "liveconnect";
+
+$DB_USER =
+    getenv("DB_USER") ?: "root";
+
+$DB_PASS =
+    getenv("DB_PASS") ?: "";
+
+
+/*
+ * If DB_PUBLIC_URL exists,
+ * use the Railway public connection.
+ */
+if ($DB_PUBLIC_URL) {
+
+    $parts =
+        parse_url($DB_PUBLIC_URL);
+
+    if ($parts !== false) {
+
+        if (isset($parts["host"])) {
+            $DB_HOST =
+                $parts["host"];
+        }
+
+        if (isset($parts["port"])) {
+            $DB_PORT =
+                (int)$parts["port"];
+        }
+
+        if (isset($parts["user"])) {
+            $DB_USER =
+                urldecode(
+                    $parts["user"]
+                );
+        }
+
+        if (isset($parts["pass"])) {
+            $DB_PASS =
+                urldecode(
+                    $parts["pass"]
+                );
+        }
+
+        if (isset($parts["path"])) {
+            $DB_NAME =
+                ltrim(
+                    $parts["path"],
+                    "/"
+                );
+        }
+    }
+}
 
 
 function get_db_connection()
@@ -68,12 +123,12 @@ function get_db_connection()
         );
 
         echo json_encode([
-    "success" => false,
-    "message" =>
-        "Database connection failed.",
-    "error" =>
-        $error->getMessage()
-]);
+            "success" => false,
+            "message" =>
+                "Database connection failed.",
+            "error" =>
+                $error->getMessage()
+        ]);
 
         exit;
     }
