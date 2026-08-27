@@ -3,51 +3,21 @@
 /*
  * LiveConnect MySQL database connection.
  *
- * Production:
- *     Uses Railway MYSQLURL.
+ * Database:
+ *     liveconnect
  *
- * Local:
- *     Falls back to XAMPP MySQL.
+ * MySQL:
+ *     localhost:3306
+ *
+ * User:
+ *     root
  */
-
-$MYSQL_URL = getenv("MYSQLURL");
 
 $DB_HOST = getenv("DB_HOST") ?: "127.0.0.1";
 $DB_PORT = (int)(getenv("DB_PORT") ?: 3306);
 $DB_NAME = getenv("DB_NAME") ?: "liveconnect";
 $DB_USER = getenv("DB_USER") ?: "root";
 $DB_PASS = getenv("DB_PASS") ?: "";
-
-if ($MYSQL_URL) {
-
-    $parts = parse_url($MYSQL_URL);
-
-    if ($parts !== false) {
-
-        $DB_HOST =
-            $parts["host"] ?? $DB_HOST;
-
-        $DB_PORT =
-            isset($parts["port"])
-                ? (int)$parts["port"]
-                : $DB_PORT;
-
-        $DB_USER =
-            isset($parts["user"])
-                ? urldecode($parts["user"])
-                : $DB_USER;
-
-        $DB_PASS =
-            isset($parts["pass"])
-                ? urldecode($parts["pass"])
-                : $DB_PASS;
-
-        $DB_NAME =
-            isset($parts["path"])
-                ? ltrim($parts["path"], "/")
-                : $DB_NAME;
-    }
-}
 
 
 function get_db_connection()
@@ -98,12 +68,12 @@ function get_db_connection()
         );
 
         echo json_encode([
-            "success" => false,
-            "message" =>
-                "Database connection failed.",
-            "error" =>
-                $error->getMessage()
-        ]);
+    "success" => false,
+    "message" =>
+        "Database connection failed.",
+    "error" =>
+        $error->getMessage()
+]);
 
         exit;
     }
