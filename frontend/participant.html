@@ -627,6 +627,57 @@ body {
     }
 }
 
+/* =====================================================
+   LIVECONNECT TOAST
+   ===================================================== */
+
+.liveconnect-toast {
+
+    position: fixed;
+
+    left: 50%;
+
+    bottom: 30px;
+
+    transform:
+        translate(-50%, 20px);
+
+    background: #111827;
+
+    color: #ffffff;
+
+    padding: 12px 20px;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+
+    z-index: 99999;
+
+    box-shadow:
+        0 8px 24px
+        rgba(0, 0, 0, 0.2);
+}
+
+.liveconnect-toast.show {
+
+    opacity: 1;
+
+    transform:
+        translate(-50%, 0);
+
+}
+
 </style>
 
 </head>
@@ -3700,9 +3751,7 @@ async function sendChat() {
         !webinarId
     ) {
 
-        alert(
-            "Participant session is not ready."
-        );
+        showToast("Participant session is not ready.");
 
         return;
     }
@@ -3752,10 +3801,10 @@ async function sendChat() {
             !data.success
         ) {
 
-            alert(
-                data.message ||
-                "Message could not be sent."
-            );
+            showToast(
+                 data.message ||
+                 "Message could not be sent."
+                );
 
             return;
         }
@@ -3797,9 +3846,9 @@ async function sendChat() {
             error
         );
 
-        alert(
-            "Unable to send message."
-        );
+        showToast(
+    "Unable to send message."
+);
 
     }
 
@@ -3962,10 +4011,10 @@ async function sendReaction(
             !data.success
         ) {
 
-            alert(
-                data.message ||
-                "Reaction could not be sent."
-            );
+            showToast(
+    data.message ||
+    "Reaction could not be sent."
+);
 
             return;
 
@@ -3999,9 +4048,9 @@ async function sendReaction(
         );
 
 
-        alert(
-            "Unable to send reaction."
-        );
+        showToast(
+    "Unable to send reaction."
+);
 
     }
 
@@ -4214,10 +4263,10 @@ async function votePoll(
             !data.success
         ) {
 
-            alert(
-                data.message ||
-                "Unable to vote."
-            );
+            showToast(
+    data.message ||
+    "Unable to vote."
+);
 
             return;
 
@@ -4951,6 +5000,75 @@ function showJoinMessage(
             ${escapeHtml(message)}
         </div>
         `;
+
+}
+
+// =====================================================
+// TOAST
+// =====================================================
+
+function showToast(
+    message
+) {
+
+    const existingToast =
+        document.querySelector(
+            ".liveconnect-toast"
+        );
+
+    if (existingToast) {
+
+        existingToast.remove();
+
+    }
+
+
+    const toast =
+        document.createElement(
+            "div"
+        );
+
+    toast.className =
+        "liveconnect-toast";
+
+    toast.textContent =
+        message;
+
+    document.body.appendChild(
+        toast
+    );
+
+
+    requestAnimationFrame(
+        function() {
+
+            toast.classList.add(
+                "show"
+            );
+
+        }
+    );
+
+
+    setTimeout(
+        function() {
+
+            toast.classList.remove(
+                "show"
+            );
+
+            setTimeout(
+                function() {
+
+                    toast.remove();
+
+                },
+                300
+            );
+
+        },
+        2500
+    );
 
 }
 

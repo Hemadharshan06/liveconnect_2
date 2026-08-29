@@ -706,6 +706,33 @@ body {
 
 }
 
+.liveconnect-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translate(-50%, 20px);
+    background: #111827;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+    z-index: 99999;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.liveconnect-toast.show {
+    opacity: 1;
+    transform:
+        translate(-50%, 0);
+}
+
 
 </style>
 
@@ -2906,9 +2933,9 @@ async function createPoll() {
         options.length < 2
     ) {
 
-        alert(
-            "Enter a question and at least two options."
-        );
+        showToast(
+    "Enter a question and at least two options."
+);
 
         return;
 
@@ -2958,9 +2985,9 @@ async function createPoll() {
             !data.success
         ) {
 
-            alert(
-                data.message
-            );
+            showToast(
+    data.message
+);
 
             return;
 
@@ -3017,9 +3044,9 @@ async function createPoll() {
             error
         );
 
-        alert(
-            "Unable to create poll."
-        );
+        showToast(
+    "Unable to create poll."
+);
 
     }
 
@@ -3206,9 +3233,9 @@ async function answerQuestion(
 
         if (!data.success) {
 
-            alert(
-                data.message
-            );
+            showToast(
+    data.message
+);
 
             return;
 
@@ -3707,6 +3734,55 @@ function showPanel(
 // COPY + SHARE
 // =====================================================
 
+function showToast(message) {
+
+    const toast =
+        document.createElement("div");
+
+    toast.className =
+        "liveconnect-toast";
+
+    toast.textContent =
+        message;
+
+    document.body.appendChild(
+        toast
+    );
+
+    requestAnimationFrame(
+        function() {
+
+            toast.classList.add(
+                "show"
+            );
+
+        }
+    );
+
+    setTimeout(
+        function() {
+
+            toast.classList.remove(
+                "show"
+            );
+
+            setTimeout(
+                function() {
+
+                    toast.remove();
+
+                },
+                300
+            );
+
+        },
+        2500
+    );
+
+}
+
+
+
 async function copyCode() {
 
     try {
@@ -3715,9 +3791,7 @@ async function copyCode() {
             webinarJoinCode
         );
 
-        alert(
-            "Webinar code copied!"
-        );
+        showToast("Webinar code copied!");
 
     }
 
@@ -3750,9 +3824,7 @@ async function shareJoinLink() {
             joinLink
         );
 
-        alert(
-            "Join link copied!"
-        );
+        showToast("Join link copied!");
 
     }
 
@@ -3857,10 +3929,10 @@ async function endWebinar() {
             error
         );
 
-        alert(
-            error.message ||
-            "Unable to end webinar."
-        );
+        showToast(
+    error.message ||
+    "Unable to end webinar."
+);
 
         return;
 
