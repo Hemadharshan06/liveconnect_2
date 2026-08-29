@@ -1131,8 +1131,8 @@ body {
 // =====================================================
 // VARIABLES
 // =====================================================
-
 let webinarId = null;
+
 
 // PHP signaling server
 const PHP_BASE_URL = "/liveconnect-api";
@@ -1192,6 +1192,38 @@ const rtcConfiguration = {
 let currentPollId = null;
 
 let hasVoted = false;
+
+
+// =====================================================
+// SHARED JOIN LINK
+// =====================================================
+
+const urlParams =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const sharedJoinCode =
+    urlParams.get("code");
+
+if (sharedJoinCode) {
+
+    const joinCodeInput =
+        document.getElementById(
+            "joinCode"
+        );
+
+    if (joinCodeInput) {
+
+        joinCodeInput.value =
+            sharedJoinCode
+                .trim()
+                .toUpperCase();
+
+    }
+
+}
+
 
 
 // =====================================================

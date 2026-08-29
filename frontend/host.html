@@ -822,14 +822,21 @@ body {
                 ------
             </span>
 
+            
+
 
             <button
-                onclick="copyCode()"
-                class="copy-btn"
-            >
-
-                <i class="bi bi-copy"></i>
-
+            onclick="copyCode()"
+            class="copy-btn"
+            title="Copy webinar code">
+            <i class="bi bi-copy"></i>
+            </button>
+            
+            <button
+            onclick="shareJoinLink()"
+            class="copy-btn"
+            title="Copy join link">
+            <i class="bi bi-link-45deg"></i>
             </button>
 
         </div>
@@ -3697,24 +3704,68 @@ function showPanel(
 
 
 // =====================================================
-// COPY
+// COPY + SHARE
 // =====================================================
 
 async function copyCode() {
 
+    try {
 
-    await navigator.clipboard.writeText(
-        webinarJoinCode
-    );
+        await navigator.clipboard.writeText(
+            webinarJoinCode
+        );
 
+        alert(
+            "Webinar code copied!"
+        );
 
-    alert(
-        "Webinar code copied!"
-    );
+    }
+
+    catch (error) {
+
+        console.error(
+            "Copy code:",
+            error
+        );
+
+    }
 
 }
 
 
+async function shareJoinLink() {
+
+    if (!webinarJoinCode) {
+
+        return;
+
+    }
+
+    const joinLink =
+        `${window.location.origin}/participant.html?code=${encodeURIComponent(webinarJoinCode)}`;
+
+    try {
+
+        await navigator.clipboard.writeText(
+            joinLink
+        );
+
+        alert(
+            "Join link copied!"
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Copy join link:",
+            error
+        );
+
+    }
+
+}
 // =====================================================
 // END
 // =====================================================
