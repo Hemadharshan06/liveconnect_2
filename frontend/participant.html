@@ -1243,7 +1243,6 @@ let localStream = null;
 
 let screenStream = null;
 
-let microphoneEnabled = true;
 
 let cameraEnabled = true;
 
@@ -1290,6 +1289,8 @@ const rtcConfiguration = {
 let currentPollId = null;
 
 let hasVoted = false;
+
+let mutedByHost = false;
 
 
 // =====================================================
@@ -2554,6 +2555,117 @@ async function handlePHPSignal(
             )
             .style.display =
             "flex";
+
+
+        return;
+
+    }
+
+        // ================================================
+    // PARTICIPANT MUTED BY HOST
+    // ================================================
+
+    if (
+        data.type ===
+        "participant_muted"
+    ) {
+
+        /*
+         * Make sure this command is intended
+         * for this participant.
+         */
+
+        if (
+            Number(
+                data.participant_id
+            ) !==
+            Number(
+                participantId
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Disable the participant's
+         * microphone.
+         */
+
+        if (
+            localStream
+        ) {
+
+            localStream
+                .getAudioTracks()
+                .forEach(
+                    function(track) {
+
+                        track.enabled =
+                            false;
+
+                    }
+                );
+
+        }
+
+
+        /*
+         * Update local microphone state.
+         */
+
+        microphoneEnabled =
+            false;
+
+        mutedByHost =
+            true;
+
+
+        /*
+         * Update the microphone button.
+         */
+
+        const muteIcon =
+            document.getElementById(
+                "muteIcon"
+            );
+
+
+        if (
+            muteIcon
+        ) {
+
+            muteIcon.className =
+                "bi bi-mic-mute";
+
+        }
+
+
+        const muteText =
+            document.getElementById(
+                "muteText"
+            );
+
+
+        if (
+            muteText
+        ) {
+
+            muteText.textContent =
+                "Unmute";
+
+        }
+
+
+        /*
+         * Tell the participant what happened.
+         */
+
+        showToast(
+            "The host muted your microphone."
+        );
 
 
         return;
@@ -4918,6 +5030,18 @@ function addQuestion(
 // =====================================================
 
 function toggleMute() {
+
+        if (
+        mutedByHost
+    ) {
+
+        showToast(
+            "The host has muted your microphone."
+        );
+
+        return;
+
+    }
 
     if (
         !localStream
