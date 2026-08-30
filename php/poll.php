@@ -7,7 +7,7 @@
  *
  * 1. Broadcast signals
  * 2. Sender exclusion
- * 3. Targeted participant signals
+ * 3. Targeted moderation signals
  */
 
 $origin =
@@ -52,6 +52,10 @@ header(
 );
 
 
+/*
+ * Handle CORS preflight.
+ */
+
 if (
     $_SERVER["REQUEST_METHOD"] ===
     "OPTIONS"
@@ -64,8 +68,18 @@ if (
 }
 
 
+/*
+ * Load signaling configuration.
+ */
+
 require_once __DIR__ . "/config.php";
 
+
+/*
+ * Read request data.
+ *
+ * GET is used by the frontend for polling.
+ */
 
 $data =
     get_json_body();
@@ -81,15 +95,34 @@ if (
 }
 
 
+/*
+ * Required webinar ID.
+ */
+
 $webinarId =
     $data["webinar_id"]
     ?? null;
 
 
+/*
+ * Receiver ID.
+ *
+ * Host:
+ *     host
+ *
+ * Participant:
+ *     participant database ID
+ */
+
 $receiverId =
     $data["receiver_id"]
     ?? null;
 
+
+/*
+ * Only return signals newer than
+ * this timestamp.
+ */
 
 $after =
     isset(
@@ -119,9 +152,17 @@ if (
 }
 
 
+/*
+ * Read all stored signals.
+ */
+
 $signals =
     read_signals();
 
+
+/*
+ * Remove expired signals.
+ */
 
 cleanup_old_signals(
     $signals
@@ -131,18 +172,28 @@ cleanup_old_signals(
 $result = [];
 
 
+/*
+ * Keep track of the newest signal
+ * timestamp examined.
+ */
+
 $latestTimestamp =
     $after;
 
+
+/*
+ * Examine every stored signal.
+ */
 
 foreach (
     $signals
     as $signal
 ) {
 
+
     /*
-     * Signal must belong to
-     * the requested webinar.
+     * Signal must belong to the
+     * requested webinar.
      */
 
     if (
@@ -168,8 +219,7 @@ foreach (
 
 
     /*
-     * Ignore signals already
-     * processed by this receiver.
+     * Get signal creation time.
      */
 
     $createdAt =
@@ -182,6 +232,11 @@ foreach (
             : 0;
 
 
+    /*
+     * Ignore signals that the client
+     * has already processed.
+     */
+
     if (
         $createdAt <=
         $after
@@ -193,7 +248,8 @@ foreach (
 
 
     /*
-     * Get the actual message data.
+     * Extract the actual frontend
+     * message stored inside the signal.
      */
 
     $message =
@@ -208,10 +264,21 @@ foreach (
 
 
     /*
-     * Sender exclusion.
+     * -------------------------------------------------
+     * SENDER EXCLUSION
+     * -------------------------------------------------
      *
-     * A client should not receive
-     * its own signal.
+     * Do not send a client's own
+     * signal back to that client.
+     *
+     * Example:
+     *
+     * Participant 12 sends chat.
+     * Participant 12 should not receive
+     * that same signal from polling.
+     *
+     * The sender already displays their
+     * own local message.
      */
 
     if (
@@ -241,39 +308,53 @@ foreach (
 
 
     /*
-     * TARGETED SIGNAL
+     * -------------------------------------------------
+     * TARGETED MODERATION SIGNAL
+     * -------------------------------------------------
      *
-     * If participant_id exists,
-     * treat it as a targeted participant
-     * signal for moderation commands
-     * such as participant_removed.
+     * ONLY moderation commands are
+     * treated as directly targeted.
      *
-     * Only the matching participant
-     * receives the signal.
+     * At present:
      *
-     * Host receiver_id is usually "host",
-     * so Host does not match a numeric
+     *     participant_removed
+     *
+     * has a participant_id telling us
+     * exactly which participant should
+     * receive the signal.
+     *
+     * IMPORTANT:
+     *
+     * We do NOT use the presence of
+     * participant_id alone to determine
+     * targeting because normal WebRTC
+     * and participant signals also contain
      * participant_id.
      */
 
     if (
         isset(
-            $message["participant_id"]
+            $message["type"]
         ) &&
-        $message["participant_id"] !== null &&
-        $message["participant_id"] !== ""
+        $message["type"] ===
+            "participant_removed"
     ) {
-
-        $targetParticipantId =
-            (string)$message["participant_id"];
 
 
         /*
-         * Host polling:
-         * receiver_id = "host"
-         *
-         * Host should not receive a
-         * participant-targeted signal.
+         * ID of the participant selected
+         * by the Host.
+         */
+
+        $targetParticipantId =
+            $message["participant_id"]
+            ?? null;
+
+
+        /*
+         * A Host should never receive
+         * another participant's
+         * moderation command.
          */
 
         if (
@@ -300,15 +381,39 @@ foreach (
 
 
         /*
-         * Participant polling:
-         * only the targeted participant
-         * receives the signal.
+         * If there is no valid target,
+         * do not deliver the command.
+         */
+
+        if (
+            $targetParticipantId === null ||
+            $targetParticipantId === ""
+        ) {
+
+            if (
+                $createdAt >
+                $latestTimestamp
+            ) {
+
+                $latestTimestamp =
+                    $createdAt;
+
+            }
+
+            continue;
+
+        }
+
+
+        /*
+         * Only the selected participant
+         * receives participant_removed.
          */
 
         if (
             (string)$receiverId
             !==
-            $targetParticipantId
+            (string)$targetParticipantId
         ) {
 
             if (
@@ -329,8 +434,12 @@ foreach (
 
 
     /*
-     * Add internal metadata so the
-     * frontend can identify the signal.
+     * -------------------------------------------------
+     * ATTACH INTERNAL SIGNAL METADATA
+     * -------------------------------------------------
+     *
+     * These values are useful to the
+     * frontend for identifying the signal.
      */
 
     $message["_signal_id"] =
@@ -346,9 +455,17 @@ foreach (
         ?? null;
 
 
+    /*
+     * Deliver the signal.
+     */
+
     $result[] =
         $message;
 
+
+    /*
+     * Update latest timestamp.
+     */
 
     if (
         $createdAt >
@@ -363,10 +480,18 @@ foreach (
 }
 
 
+/*
+ * Save the cleaned signal collection.
+ */
+
 write_signals(
     $signals
 );
 
+
+/*
+ * Return all eligible signals.
+ */
 
 json_response(
     [
