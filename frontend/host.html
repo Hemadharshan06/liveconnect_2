@@ -987,6 +987,16 @@ body {
 
             </button>
 
+
+            <button
+            id="filesTab"
+            class="tab"
+            onclick="showPanel('files')">
+            <i class="bi bi-folder2-open me-1"></i>
+            Files
+
+            </button>
+
         </div>
 
 
@@ -1187,6 +1197,61 @@ body {
             </div>
 
         </div>
+
+
+        <!-- FILES -->
+
+<div
+    id="filesPanel"
+    class="panel"
+    style="display:none;"
+>
+
+    <div
+        class="d-flex justify-content-between align-items-center mb-3"
+    >
+
+        <h6 class="mb-0">
+            Shared Files
+        </h6>
+
+        <button
+            onclick="chooseSharedFile()"
+            class="btn btn-primary btn-sm"
+        >
+
+            <i class="bi bi-upload me-1"></i>
+
+            Upload
+
+        </button>
+
+    </div>
+
+
+    <input
+        id="sharedFileInput"
+        type="file"
+        style="display:none;"
+        onchange="uploadSharedFile(event)"
+    >
+
+
+    <div
+        id="sharedFileList"
+    >
+
+        <div
+            id="emptySharedFiles"
+            class="text-secondary text-center small"
+        >
+
+            No files shared yet.
+
+        </div>
+
+    </div>
+</div>
 
 
         <!-- CHAT INPUT -->
@@ -1529,6 +1594,9 @@ async function startWebinar() {
 
 
         connectPHPPolling();
+
+        
+        loadSharedFiles();
 
 
     }
@@ -2035,7 +2103,39 @@ async function handlePHPSignal(data) {
         );
 
     }
+   
+// ==========================================
+// SHARED FILE
+// ==========================================
 
+if (
+    data.type ===
+    "shared_file"
+) {
+
+    addSharedFile({
+
+        file_id:
+            data.file_id,
+
+        sender_name:
+            data.sender_name,
+
+        original_name:
+            data.original_name,
+
+        file_type:
+            data.file_type,
+
+        file_size:
+            data.file_size,
+
+        file_url:
+            data.file_url
+
+    });
+
+}
 
     // ==========================================
     // POLL CREATED
@@ -3632,52 +3732,62 @@ function showPanel(
 
     const panels = {
 
-        people:
-            document.getElementById(
-                "peoplePanel"
-            ),
+    chat:
+        document.getElementById(
+            "chatPanel"
+        ),
 
-        chat:
-            document.getElementById(
-                "chatPanel"
-            ),
+    people:
+        document.getElementById(
+            "peoplePanel"
+        ),
 
-        poll:
-            document.getElementById(
-                "pollPanel"
-            ),
+    poll:
+        document.getElementById(
+            "pollPanel"
+        ),
 
-        qa:
-            document.getElementById(
-                "qaPanel"
-            )
+    qa:
+        document.getElementById(
+            "qaPanel"
+        ),
 
-    };
+    files:
+        document.getElementById(
+            "filesPanel"
+        )
+
+};
 
 
     const tabs = {
 
-        people:
-            document.getElementById(
-                "peopleTab"
-            ),
+    people:
+        document.getElementById(
+            "peopleTab"
+        ),
 
-        chat:
-            document.getElementById(
-                "chatTab"
-            ),
+    chat:
+        document.getElementById(
+            "chatTab"
+        ),
 
-        poll:
-            document.getElementById(
-                "pollTab"
-            ),
+    poll:
+        document.getElementById(
+            "pollTab"
+        ),
 
-        qa:
-            document.getElementById(
-                "qaTab"
-            )
+    qa:
+        document.getElementById(
+            "qaTab"
+        ),
 
-    };
+    files:
+        document.getElementById(
+            "filesTab"
+        )
+
+};
 
 
     Object.values(
@@ -3838,6 +3948,413 @@ async function shareJoinLink() {
     }
 
 }
+
+// =====================================================
+// SHARED FILES
+// =====================================================
+
+function chooseSharedFile() {
+
+    const input =
+        document.getElementById(
+            "sharedFileInput"
+        );
+
+    if (input) {
+
+        input.click();
+
+    }
+
+}
+
+
+async function uploadSharedFile(
+    event
+) {
+
+    const input =
+        event.target;
+
+    const file =
+        input.files &&
+        input.files[0];
+
+
+    if (!file) {
+
+        return;
+
+    }
+
+
+    if (!webinarId) {
+
+        alert(
+            "Webinar session is not ready."
+        );
+
+        input.value = "";
+
+        return;
+
+    }
+
+
+    const maxSize =
+        10 * 1024 * 1024;
+
+
+    if (
+        file.size >
+        maxSize
+    ) {
+
+        alert(
+            "File size must be 10 MB or less."
+        );
+
+        input.value = "";
+
+        return;
+
+    }
+
+
+    try {
+
+        const formData =
+            new FormData();
+
+
+        formData.append(
+            "webinar_id",
+            webinarId
+        );
+
+
+        formData.append(
+            "sender_name",
+            "Host"
+        );
+
+
+        formData.append(
+            "file",
+            file
+        );
+
+
+        const response =
+            await fetch(
+                `${PHP_BASE_URL}/upload_file.php`,
+                {
+                    method:
+                        "POST",
+
+                    body:
+                        formData
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "File upload failed."
+            );
+
+        }
+
+
+        addSharedFile(
+            data
+        );
+
+
+        await sendSignal({
+
+            type:
+                "shared_file",
+
+            file_id:
+                data.file_id,
+
+            sender_name:
+                data.sender_name,
+
+            original_name:
+                data.original_name,
+
+            file_type:
+                data.file_type,
+
+            file_size:
+                data.file_size,
+
+            file_url:
+                data.file_url
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "File upload:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Unable to upload file."
+        );
+
+    }
+
+    finally {
+
+        input.value = "";
+
+    }
+
+}
+
+
+function addSharedFile(
+    file
+) {
+
+    const list =
+        document.getElementById(
+            "sharedFileList"
+        );
+
+
+    if (!list) {
+
+        return;
+
+    }
+
+
+    const fileId =
+        file.file_id ||
+        file.id;
+
+
+    if (fileId) {
+
+        const existing =
+            list.querySelector(
+                `[data-file-id="${fileId}"]`
+            );
+
+        if (existing) {
+
+            return;
+
+        }
+
+    }
+
+
+    const empty =
+        document.getElementById(
+            "emptySharedFiles"
+        );
+
+
+    if (empty) {
+
+        empty.remove();
+
+    }
+
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+
+    item.className =
+        "participant-item";
+
+
+    if (fileId) {
+
+        item.dataset.fileId =
+            fileId;
+
+    }
+
+
+    const sender =
+        file.sender_name ||
+        "Participant";
+
+
+    const name =
+        file.original_name ||
+        "Shared file";
+
+
+    const size =
+        formatFileSize(
+            file.file_size
+        );
+
+
+    item.innerHTML =
+        `
+        <div style="min-width:0;">
+
+            <div
+                class="fw-bold text-light"
+                style="word-break:break-word;"
+            >
+
+                <i class="bi bi-file-earmark me-1"></i>
+
+                ${escapeHtml(name)}
+
+            </div>
+
+            <div class="small text-secondary">
+
+                ${escapeHtml(sender)}
+                ${size ? ` • ${escapeHtml(size)}` : ""}
+
+            </div>
+
+        </div>
+
+        <a
+            href="${escapeHtml(file.file_url || "#")}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-primary btn-sm ms-2"
+        >
+
+            <i class="bi bi-download"></i>
+
+        </a>
+        `;
+
+
+    list.appendChild(
+        item
+    );
+
+}
+
+
+function formatFileSize(
+    bytes
+) {
+
+    const size =
+        Number(bytes || 0);
+
+
+    if (
+        size < 1024
+    ) {
+
+        return `${size} B`;
+
+    }
+
+
+    if (
+        size < 1024 * 1024
+    ) {
+
+        return `${(size / 1024).toFixed(1)} KB`;
+
+    }
+
+
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+
+}
+
+
+async function loadSharedFiles() {
+
+    if (!webinarId) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${PHP_BASE_URL}/files.php?webinar_id=${encodeURIComponent(webinarId)}`,
+                {
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load files."
+            );
+
+        }
+
+
+        const files =
+            data.files || [];
+
+
+        files.forEach(
+            function(file) {
+
+                addSharedFile(
+                    file
+                );
+
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Load shared files:",
+            error
+        );
+
+    }
+
+}
+
 // =====================================================
 // END
 // =====================================================

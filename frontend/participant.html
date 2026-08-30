@@ -907,6 +907,18 @@ body {
 
             </button>
 
+
+            <button
+            id="filesTab"
+            class="tab"
+            onclick="showPanel('files')"
+            >
+            <i class="bi bi-folder2-open me-1"></i>
+
+            Files
+
+            </button>
+
         </div>
 
 
@@ -1025,10 +1037,45 @@ body {
         </div>
 
 
-        <!-- CHAT INPUT -->
+<!-- FILES -->
+
+<div
+    id="filesPanel"
+    class="panel"
+    style="display:none;"
+>
+
+    <div
+        class="d-flex justify-content-between align-items-center mb-3"
+    >
+
+        <h6 class="mb-0">
+            Shared Files
+        </h6>
+
+    </div>
+
+    <div
+        id="sharedFileList"
+    >
 
         <div
-            id="chatInputArea"
+            id="emptySharedFiles"
+            class="text-secondary text-center small"
+        >
+
+            No files shared yet.
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- CHAT INPUT -->
+
+<div
+    id="chatInputArea"
             class="chat-input"
         >
 
@@ -2485,6 +2532,44 @@ async function handlePHPSignal(
         return;
 
     }
+
+    // ================================================
+// SHARED FILE
+// ================================================
+
+if (
+    data.type ===
+    "shared_file"
+) {
+
+    addSharedFile({
+
+        file_id:
+            data.file_id,
+
+        sender_name:
+            data.sender_name,
+
+        original_name:
+            data.original_name,
+
+        file_type:
+            data.file_type,
+
+        file_size:
+            data.file_size,
+
+        file_url:
+            data.file_url
+
+    });
+
+    return;
+
+}
+
+
+    
 
 }
 
@@ -4775,6 +4860,11 @@ function showPanel(
         qa:
             document.getElementById(
                 "qaPanel"
+            ),
+
+        files:
+            document.getElementById(
+                "filesPanel"
             )
 
     };
@@ -4800,6 +4890,11 @@ function showPanel(
         qa:
             document.getElementById(
                 "qaTab"
+            ),
+
+        files:
+            document.getElementById(
+                "filesTab"
             )
 
     };
@@ -4810,8 +4905,12 @@ function showPanel(
     ).forEach(
         function(panelElement) {
 
-            panelElement.style.display =
-                "none";
+            if (panelElement) {
+
+                panelElement.style.display =
+                    "none";
+
+            }
 
         }
     );
@@ -4822,39 +4921,354 @@ function showPanel(
     ).forEach(
         function(tabElement) {
 
-            tabElement.classList.remove(
-                "active"
-            );
+            if (tabElement) {
+
+                tabElement.classList.remove(
+                    "active"
+                );
+
+            }
 
         }
     );
 
 
-    panels[
-        panel
-    ].style.display =
-        "block";
+    if (
+        panels[panel]
+    ) {
+
+        panels[panel].style.display =
+            "block";
+
+    }
 
 
-    tabs[
-        panel
-    ].classList.add(
-        "active"
-    );
+    if (
+        tabs[panel]
+    ) {
+
+        tabs[panel].classList.add(
+            "active"
+        );
+
+    }
 
 
-    document
-        .getElementById(
+    const chatInputArea =
+        document.getElementById(
             "chatInputArea"
-        )
-        .style.display =
-        panel === "chat"
-            ? "flex"
-            : "none";
+        );
+
+
+    if (chatInputArea) {
+
+        chatInputArea.style.display =
+            panel === "chat"
+                ? "flex"
+                : "none";
+
+    }
+
+
+    if (
+        panel === "files"
+    ) {
+
+        loadSharedFiles();
+
+    }
+
+}
+
+// =====================================================
+// SHARED FILES
+// =====================================================
+
+function addSharedFile(
+    file
+) {
+
+    const list =
+        document.getElementById(
+            "sharedFileList"
+        );
+
+
+    if (!list) {
+
+        return;
+
+    }
+
+
+    const fileId =
+        file.file_id ||
+        file.id;
+
+
+    if (fileId) {
+
+        const existing =
+            list.querySelector(
+                `[data-file-id="${fileId}"]`
+            );
+
+
+        if (existing) {
+
+            return;
+
+        }
+
+    }
+
+
+    const empty =
+        document.getElementById(
+            "emptySharedFiles"
+        );
+
+
+    if (empty) {
+
+        empty.remove();
+
+    }
+
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+
+    item.className =
+        "participant-item";
+
+
+    if (fileId) {
+
+        item.dataset.fileId =
+            fileId;
+
+    }
+
+
+    const sender =
+        file.sender_name ||
+        "Host";
+
+
+    const name =
+        file.original_name ||
+        file.file_name ||
+        "Shared file";
+
+
+    const size =
+        formatFileSize(
+            file.file_size
+        );
+
+
+    const fileUrl =
+        file.file_url ||
+        file.url ||
+        "#";
+
+
+    item.innerHTML =
+        `
+        <div style="min-width:0;">
+
+            <div
+                class="fw-bold text-light"
+                style="word-break:break-word;"
+            >
+
+                <i class="bi bi-file-earmark me-1"></i>
+
+                ${escapeHtml(name)}
+
+            </div>
+
+            <div class="small text-secondary">
+
+                ${escapeHtml(sender)}
+
+                ${size
+                    ? ` • ${escapeHtml(size)}`
+                    : ""
+                }
+
+            </div>
+
+        </div>
+
+        <a
+            href="${escapeHtml(fileUrl)}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-primary btn-sm ms-2"
+        >
+
+            <i class="bi bi-download"></i>
+
+        </a>
+        `;
+
+
+    list.appendChild(
+        item
+    );
 
 }
 
 
+function formatFileSize(
+    bytes
+) {
+
+    const size =
+        Number(
+            bytes || 0
+        );
+
+
+    if (
+        size < 1024
+    ) {
+
+        return `${size} B`;
+
+    }
+
+
+    if (
+        size < 1024 * 1024
+    ) {
+
+        return `${(
+            size / 1024
+        ).toFixed(1)} KB`;
+
+    }
+
+
+    return `${(
+        size /
+        (1024 * 1024)
+    ).toFixed(1)} MB`;
+
+}
+
+
+async function loadSharedFiles() {
+
+    if (
+        !webinarId
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${PHP_BASE_URL}/files.php?webinar_id=${encodeURIComponent(webinarId)}`,
+                {
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load files."
+            );
+
+        }
+
+
+        const list =
+            document.getElementById(
+                "sharedFileList"
+            );
+
+
+        if (
+            list
+        ) {
+
+            list.innerHTML = "";
+
+        }
+
+
+        const files =
+            data.files || [];
+
+
+        if (
+            files.length === 0
+        ) {
+
+            if (list) {
+
+                list.innerHTML =
+                    `
+                    <div
+                        id="emptySharedFiles"
+                        class="text-secondary text-center small"
+                    >
+
+                        No files shared yet.
+
+                    </div>
+                    `;
+
+            }
+
+            return;
+
+        }
+
+
+        files.forEach(
+            function(file) {
+
+                addSharedFile(
+                    file
+                );
+
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Load shared files:",
+            error
+        );
+
+    }
+
+}
 // =====================================================
 // LEAVE
 // =====================================================
