@@ -2595,33 +2595,29 @@ async function handlePHPSignal(
          */
 
         if (
-            localStream
-        ) {
+    localStream
+) {
 
-            localStream
-                .getAudioTracks()
-                .forEach(
-                    function(track) {
+    localStream
+        .getAudioTracks()
+        .forEach(
+            function(track) {
 
-                        track.enabled =
-                            false;
+                track.enabled =
+                    false;
 
-                    }
-                );
+            }
+        );
 
-        }
+}
 
 
-        /*
-         * Update local microphone state.
-         */
+mutedByHost =
+    true;
 
-        microphoneEnabled =
-            false;
 
-        mutedByHost =
-            true;
-
+microphoneEnabled =
+    false;
 
         /*
          * Update the microphone button.
