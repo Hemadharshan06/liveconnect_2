@@ -2709,37 +2709,53 @@ function addParticipant(
         id;
 
 
-    item.innerHTML =
-        `
+   item.innerHTML =
+    `
+    <div
+        style="
+            min-width:0;
+            flex:1;
+        "
+    >
+
+        <span>
+
+            <i class="bi bi-person-circle text-primary me-1"></i>
+
+            ${escapeHtml(name)}
+
+        </span>
+
         <div
-            style="
-                min-width:0;
-                flex:1;
-            "
+            class="small text-success mt-1"
         >
 
-            <span>
-
-                <i class="bi bi-person-circle text-primary me-1"></i>
-
-                ${escapeHtml(name)}
-
-            </span>
-
-            <div
-                class="small text-success mt-1"
-            >
-
-                ● Online
-
-            </div>
+            ● Online
 
         </div>
+
+    </div>
+
+
+    <div
+        class="d-flex align-items-center gap-1 ms-2"
+    >
+
+        <button
+            type="button"
+            class="btn btn-warning btn-sm"
+            title="Mute participant"
+            onclick="muteParticipantFromWebinar(${Number(id)})"
+        >
+
+            <i class="bi bi-mic-mute"></i>
+
+        </button>
 
 
         <button
             type="button"
-            class="btn btn-danger btn-sm ms-2"
+            class="btn btn-danger btn-sm"
             title="Remove participant"
             onclick="removeParticipantFromWebinar(${Number(id)})"
         >
@@ -2747,12 +2763,14 @@ function addParticipant(
             <i class="bi bi-person-x"></i>
 
         </button>
-        `;
+
+    </div>
+    `;
 
 
-    list.appendChild(
-        item
-    );
+list.appendChild(
+    item
+);
 
 }
 
@@ -2861,6 +2879,71 @@ async function removeParticipantFromWebinar(
 
     showToast(
         "Participant removed."
+    );
+
+}
+
+
+// =====================================================
+// MUTE PARTICIPANT
+// =====================================================
+
+async function muteParticipantFromWebinar(
+    participantIdToMute
+) {
+
+    if (
+        !participantIdToMute
+    ) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "Mute this participant's microphone?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    const result =
+        await sendSignal({
+
+            type:
+                "participant_muted",
+
+            participant_id:
+                Number(
+                    participantIdToMute
+                )
+
+        });
+
+
+    if (
+        !result ||
+        !result.success
+    ) {
+
+        showToast(
+            "Unable to mute participant."
+        );
+
+        return;
+
+    }
+
+
+    showToast(
+        "Participant muted."
     );
 
 }
