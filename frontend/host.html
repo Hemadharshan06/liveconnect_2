@@ -1439,6 +1439,8 @@ let peerConnections = {};
 
 let participantNames = {};
 
+let participantMuteStates = {};
+
 let cameraEnabled = true;
 
 let microphoneEnabled = true;
@@ -2695,6 +2697,10 @@ function addParticipant(
     }
 
 
+    participantMuteStates[id] =
+        false;
+
+
     const item =
         document.createElement(
             "div"
@@ -2709,68 +2715,68 @@ function addParticipant(
         id;
 
 
-   item.innerHTML =
-    `
-    <div
-        style="
-            min-width:0;
-            flex:1;
-        "
-    >
-
-        <span>
-
-            <i class="bi bi-person-circle text-primary me-1"></i>
-
-            ${escapeHtml(name)}
-
-        </span>
-
+    item.innerHTML =
+        `
         <div
-            class="small text-success mt-1"
+            style="
+                min-width:0;
+                flex:1;
+            "
         >
 
-            ● Online
+            <span>
+
+                <i class="bi bi-person-circle text-primary me-1"></i>
+
+                ${escapeHtml(name)}
+
+            </span>
+
+            <div
+                class="small text-success mt-1 participant-status"
+            >
+
+                ● Online
+
+            </div>
 
         </div>
 
-    </div>
 
-
-    <div
-        class="d-flex align-items-center gap-1 ms-2"
-    >
-
-        <button
-            type="button"
-            class="btn btn-warning btn-sm"
-            title="Mute participant"
-            onclick="muteParticipantFromWebinar(${Number(id)})"
+        <div
+            class="d-flex align-items-center gap-1 ms-2"
         >
 
-            <i class="bi bi-mic-mute"></i>
+            <button
+                type="button"
+                class="btn btn-warning btn-sm participant-mute-button"
+                title="Mute participant"
+                onclick="toggleParticipantMute(${Number(id)})"
+            >
 
-        </button>
+                <i class="bi bi-mic-mute"></i>
 
-
-        <button
-            type="button"
-            class="btn btn-danger btn-sm"
-            title="Remove participant"
-            onclick="removeParticipantFromWebinar(${Number(id)})"
-        >
-
-            <i class="bi bi-person-x"></i>
-
-        </button>
-
-    </div>
-    `;
+            </button>
 
 
-list.appendChild(
-    item
-);
+            <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                title="Remove participant"
+                onclick="removeParticipantFromWebinar(${Number(id)})"
+            >
+
+                <i class="bi bi-person-x"></i>
+
+            </button>
+
+        </div>
+        `;
+
+
+    list.appendChild(
+        item
+    );
 
 }
 
@@ -2882,18 +2888,22 @@ async function removeParticipantFromWebinar(
     );
 
 }
-
-
 // =====================================================
-// MUTE PARTICIPANT
+// PARTICIPANT MUTE BUTTON
 // =====================================================
 
-async function muteParticipantFromWebinar(
-    participantIdToMute
+function updateParticipantMuteButton(
+    participantId
 ) {
 
+    const item =
+        document.querySelector(
+            `[data-participant-id="${participantId}"]`
+        );
+
+
     if (
-        !participantIdToMute
+        !item
     ) {
 
         return;
@@ -2901,39 +2911,206 @@ async function muteParticipantFromWebinar(
     }
 
 
-    const result =
-        await sendSignal({
+    const button =
+        item.querySelector(
+            ".participant-mute-button"
+        );
 
-            type:
-                "participant_muted",
 
-            participant_id:
-                Number(
-                    participantIdToMute
-                )
-
-        });
+    const status =
+        item.querySelector(
+            ".participant-status"
+        );
 
 
     if (
-        !result ||
-        !result.success
+        !button
     ) {
 
-        showToast(
-            "Unable to mute participant."
-        );
+        return;
+
+    }
+
+
+    const isMuted =
+        participantMuteStates[
+            participantId
+        ] === true;
+
+
+    if (
+        isMuted
+    ) {
+
+        button.className =
+            "btn btn-success btn-sm participant-mute-button";
+
+        button.title =
+            "Unmute participant";
+
+        button.innerHTML =
+            `
+            <i class="bi bi-mic"></i>
+            `;
+
+
+        if (
+            status
+        ) {
+
+            status.textContent =
+                "● Muted";
+
+            status.classList.remove(
+                "text-success"
+            );
+
+            status.classList.add(
+                "text-warning"
+            );
+
+        }
+
+    }
+
+    else {
+
+        button.className =
+            "btn btn-warning btn-sm participant-mute-button";
+
+        button.title =
+            "Mute participant";
+
+        button.innerHTML =
+            `
+            <i class="bi bi-mic-mute"></i>
+            `;
+
+
+        if (
+            status
+        ) {
+
+            status.textContent =
+                "● Online";
+
+            status.classList.remove(
+                "text-warning"
+            );
+
+            status.classList.add(
+                "text-success"
+            );
+
+        }
+
+    }
+
+}
+
+// ================================================
+// PARTICIPANT UNMUTED BY HOST
+// ================================================
+
+if (
+    data.type ===
+    "participant_unmuted"
+) {
+
+    if (
+        Number(
+            data.participant_id
+        ) !==
+        Number(
+            participantId
+        )
+    ) {
 
         return;
+
+    }
+
+
+    /*
+     * Host has released the mute.
+     */
+
+    mutedByHost =
+        false;
+
+
+    /*
+     * Turn the participant microphone
+     * back on.
+     */
+
+    if (
+        localStream
+    ) {
+
+        localStream
+            .getAudioTracks()
+            .forEach(
+                function(track) {
+
+                    track.enabled =
+                        true;
+
+                }
+            );
+
+    }
+
+
+    microphoneEnabled =
+        true;
+
+
+    /*
+     * Restore normal microphone icon.
+     */
+
+    const muteIcon =
+        document.getElementById(
+            "muteIcon"
+        );
+
+
+    if (
+        muteIcon
+    ) {
+
+        muteIcon.className =
+            "bi bi-mic";
+
+    }
+
+
+    const muteText =
+        document.getElementById(
+            "muteText"
+        );
+
+
+    if (
+        muteText
+    ) {
+
+        muteText.textContent =
+            "Mute";
 
     }
 
 
     showToast(
-        "Participant muted."
+        "The host unmuted your microphone."
     );
 
+
+    return;
+
 }
+
 
 // =====================================================
 // CHAT
