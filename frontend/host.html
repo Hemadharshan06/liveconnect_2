@@ -2901,19 +2901,6 @@ async function muteParticipantFromWebinar(
     }
 
 
-    const confirmed =
-        confirm(
-            "Mute this participant's microphone?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
     const result =
         await sendSignal({
 
