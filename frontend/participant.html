@@ -2666,6 +2666,113 @@ if (
 
     }
 
+    // ================================================
+    // PARTICIPANT UNMUTED BY HOST
+    // ================================================
+
+    if (
+        data.type ===
+        "participant_unmuted"
+    ) {
+
+        /*
+         * Make sure this command is intended
+         * for this participant.
+         */
+
+        if (
+            Number(
+                data.participant_id
+            ) !==
+            Number(
+                participantId
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Host has released the mute.
+         */
+
+        mutedByHost =
+            false;
+
+
+        /*
+         * Turn the microphone back on.
+         */
+
+        if (
+            localStream
+        ) {
+
+            localStream
+                .getAudioTracks()
+                .forEach(
+                    function(track) {
+
+                        track.enabled =
+                            true;
+
+                    }
+                );
+
+        }
+
+
+        microphoneEnabled =
+            true;
+
+
+        /*
+         * Restore microphone icon.
+         */
+
+        const muteIcon =
+            document.getElementById(
+                "muteIcon"
+            );
+
+
+        if (
+            muteIcon
+        ) {
+
+            muteIcon.className =
+                "bi bi-mic";
+
+        }
+
+
+        const muteText =
+            document.getElementById(
+                "muteText"
+            );
+
+
+        if (
+            muteText
+        ) {
+
+            muteText.textContent =
+                "Mute";
+
+        }
+
+
+        showToast(
+            "The host unmuted your microphone."
+        );
+
+
+        return;
+
+    }
+
 
     // ================================================
     // CHAT
