@@ -2619,40 +2619,38 @@ mutedByHost =
 microphoneEnabled =
     false;
 
-        /*
-         * Update the microphone button.
-         */
 
-        const muteIcon =
-            document.getElementById(
-                "muteIcon"
-            );
+const muteIcon =
+    document.getElementById(
+        "muteIcon"
+    );
 
 
-        if (
-            muteIcon
-        ) {
+if (
+    muteIcon
+) {
 
-            muteIcon.className =
-                "bi bi-mic-mute";
+    muteIcon.className =
+        "bi bi-mic-mute";
 
-        }
-
-
-        const muteText =
-            document.getElementById(
-                "muteText"
-            );
+}
 
 
-        if (
-            muteText
-        ) {
+const muteText =
+    document.getElementById(
+        "muteText"
+    );
 
-            muteText.textContent =
-                "Unmute";
 
-        }
+if (
+    muteText
+) {
+
+    muteText.textContent =
+        "Unmute";
+
+}
+
 
 
         /*
