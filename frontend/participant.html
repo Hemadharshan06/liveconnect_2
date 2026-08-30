@@ -2367,6 +2367,199 @@ async function handlePHPSignal(
 
     }
 
+        // ================================================
+    // PARTICIPANT REMOVED BY HOST
+    // ================================================
+
+    if (
+        data.type ===
+        "participant_removed"
+    ) {
+
+        /*
+         * Make sure this signal is intended for
+         * this participant.
+         */
+
+        if (
+            Number(
+                data.participant_id
+            ) !==
+            Number(
+                participantId
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Stop PHP polling.
+         */
+
+        phpPolling =
+            false;
+
+
+        if (
+            phpPollTimer
+        ) {
+
+            clearTimeout(
+                phpPollTimer
+            );
+
+            phpPollTimer =
+                null;
+
+        }
+
+
+        /*
+         * Close Host connection.
+         */
+
+        if (
+            hostPeerConnection
+        ) {
+
+            hostPeerConnection.close();
+
+        }
+
+        hostPeerConnection =
+            null;
+
+
+        /*
+         * Close connections to other
+         * participants.
+         */
+
+        Object.values(
+            participantPeerConnections
+        ).forEach(
+            function(pc) {
+
+                pc.close();
+
+            }
+        );
+
+
+        participantPeerConnections =
+            {};
+
+
+        /*
+         * Stop screen sharing.
+         */
+
+        if (
+            screenStream
+        ) {
+
+            screenStream
+                .getTracks()
+                .forEach(
+                    function(track) {
+
+                        track.stop();
+
+                    }
+                );
+
+            screenStream =
+                null;
+
+        }
+
+
+        /*
+         * Stop camera and microphone.
+         */
+
+        if (
+            localStream
+        ) {
+
+            localStream
+                .getTracks()
+                .forEach(
+                    function(track) {
+
+                        track.stop();
+
+                    }
+                );
+
+            localStream =
+                null;
+
+        }
+
+
+        /*
+         * Remove all remote video tiles.
+         */
+
+        document
+            .querySelectorAll(
+                ".participant-video-tile"
+            )
+            .forEach(
+                function(tile) {
+
+                    if (
+                        tile.id !==
+                        "localVideoTile"
+                    ) {
+
+                        tile.remove();
+
+                    }
+
+                }
+            );
+
+
+        /*
+         * Show the participant that they
+         * were removed by the Host.
+         */
+
+        showJoinMessage(
+            "You were removed from the webinar by the host.",
+            "danger"
+        );
+
+
+        /*
+         * Return to the Join screen.
+         */
+
+        document
+            .getElementById(
+                "webinarSection"
+            )
+            .style.display =
+            "none";
+
+
+        document
+            .getElementById(
+                "joinSection"
+            )
+            .style.display =
+            "flex";
+
+
+        return;
+
+    }
+
 
     // ================================================
     // CHAT

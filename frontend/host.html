@@ -2656,11 +2656,19 @@ function addParticipant(
     name
 ) {
 
-
     const list =
         document.getElementById(
             "participantList"
         );
+
+
+    if (
+        !list
+    ) {
+
+        return;
+
+    }
 
 
     if (
@@ -2702,21 +2710,43 @@ function addParticipant(
 
 
     item.innerHTML =
-
         `
-        <span>
+        <div
+            style="
+                min-width:0;
+                flex:1;
+            "
+        >
 
-            <i class="bi bi-person-circle text-primary me-1"></i>
+            <span>
 
-            ${escapeHtml(name)}
+                <i class="bi bi-person-circle text-primary me-1"></i>
 
-        </span>
+                ${escapeHtml(name)}
 
-        <span class="badge bg-success">
+            </span>
 
-            Online
+            <div
+                class="small text-success mt-1"
+            >
 
-        </span>
+                ● Online
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="btn btn-danger btn-sm ms-2"
+            title="Remove participant"
+            onclick="removeParticipantFromWebinar(${Number(id)})"
+        >
+
+            <i class="bi bi-person-x"></i>
+
+        </button>
         `;
 
 
@@ -2726,6 +2756,114 @@ function addParticipant(
 
 }
 
+// =====================================================
+// REMOVE PARTICIPANT FROM WEBINAR
+// =====================================================
+
+async function removeParticipantFromWebinar(
+    participantIdToRemove
+) {
+
+    if (
+        !participantIdToRemove
+    ) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "Remove this participant from the webinar?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    /*
+     * Send a moderation signal to the
+     * selected participant.
+     */
+
+    const result =
+        await sendSignal({
+
+            type:
+                "participant_removed",
+
+            participant_id:
+                Number(
+                    participantIdToRemove
+                )
+
+        });
+
+
+    if (
+        !result ||
+        !result.success
+    ) {
+
+        showToast(
+            "Unable to remove participant."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Remove the participant from the
+     * Host's People list immediately.
+     */
+
+    removeParticipant(
+        participantIdToRemove
+    );
+
+
+    /*
+     * Update the participant count.
+     */
+
+    const countElement =
+        document.getElementById(
+            "participantCount"
+        );
+
+
+    if (countElement) {
+
+        const currentCount =
+            Number(
+                countElement.textContent
+            );
+
+
+        if (
+            currentCount > 0
+        ) {
+
+            countElement.textContent =
+                currentCount - 1;
+
+        }
+
+    }
+
+
+    showToast(
+        "Participant removed."
+    );
+
+}
 
 // =====================================================
 // CHAT
