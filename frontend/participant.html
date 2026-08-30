@@ -2573,6 +2573,70 @@ if (
 
 }
 
+// ================================================
+// SHARED FILE DELETED
+// ================================================
+
+if (
+    data.type ===
+    "shared_file_deleted"
+) {
+
+    const fileId =
+        Number(
+            data.file_id
+        );
+
+    if (
+        fileId
+    ) {
+
+        const item =
+            document.querySelector(
+                `[data-file-id="${fileId}"]`
+            );
+
+        if (
+            item
+        ) {
+
+            item.remove();
+
+        }
+
+    }
+
+
+    const list =
+        document.getElementById(
+            "sharedFileList"
+        );
+
+
+    if (
+        list &&
+        list.children.length === 0
+    ) {
+
+        list.innerHTML =
+            `
+            <div
+                id="emptySharedFiles"
+                class="text-secondary text-center small"
+            >
+
+                No files shared yet.
+
+            </div>
+            `;
+
+    }
+
+
+    return;
+
+}
+
 
 // =====================================================
 // CREATE HOST PEER CONNECTION

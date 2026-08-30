@@ -1596,6 +1596,7 @@ async function startWebinar() {
         connectPHPPolling();
 
         
+        
         loadSharedFiles();
 
 
@@ -4152,18 +4153,26 @@ function addSharedFile(
         file.id;
 
 
-    if (fileId) {
+    if (!fileId) {
 
-        const existing =
-            list.querySelector(
-                `[data-file-id="${fileId}"]`
-            );
+        return;
 
-        if (existing) {
+    }
 
-            return;
 
-        }
+    /*
+     * Do not add the same file twice.
+     */
+
+    const existing =
+        list.querySelector(
+            `[data-file-id="${fileId}"]`
+        );
+
+
+    if (existing) {
+
+        return;
 
     }
 
@@ -4191,12 +4200,8 @@ function addSharedFile(
         "participant-item";
 
 
-    if (fileId) {
-
-        item.dataset.fileId =
-            fileId;
-
-    }
+    item.dataset.fileId =
+        fileId;
 
 
     const sender =
@@ -4215,9 +4220,19 @@ function addSharedFile(
         );
 
 
+    const fileUrl =
+        file.file_url ||
+        "#";
+
+
     item.innerHTML =
         `
-        <div style="min-width:0;">
+        <div
+            style="
+                min-width:0;
+                flex:1;
+            "
+        >
 
             <div
                 class="fw-bold text-light"
@@ -4233,28 +4248,222 @@ function addSharedFile(
             <div class="small text-secondary">
 
                 ${escapeHtml(sender)}
-                ${size ? ` • ${escapeHtml(size)}` : ""}
+
+                ${
+                    size
+                        ? ` • ${escapeHtml(size)}`
+                        : ""
+                }
 
             </div>
 
         </div>
 
-        <a
-            href="${escapeHtml(file.file_url || "#")}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-primary btn-sm ms-2"
+        <div
+            class="d-flex align-items-center gap-2 ms-2"
         >
 
-            <i class="bi bi-download"></i>
+            <a
+                href="${escapeHtml(fileUrl)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-primary btn-sm"
+                title="Open file"
+            >
 
-        </a>
+                <i class="bi bi-download"></i>
+
+            </a>
+
+            <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                title="Delete file"
+                onclick="deleteSharedFile(${Number(fileId)})"
+            >
+
+                <i class="bi bi-trash"></i>
+
+            </button>
+
+        </div>
         `;
 
 
     list.appendChild(
         item
     );
+
+}
+
+// =====================================================
+// DELETE SHARED FILE
+// =====================================================
+
+async function deleteSharedFile(
+    fileId
+) {
+
+    if (
+        !fileId ||
+        !webinarId
+    ) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this file?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const params =
+            new URLSearchParams();
+
+
+        params.append(
+            "file_id",
+            fileId
+        );
+
+
+        params.append(
+            "webinar_id",
+            webinarId
+        );
+
+
+        const response =
+            await fetch(
+                `${PHP_BASE_URL}/delete_file.php`,
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded; charset=UTF-8"
+                    },
+
+                    body:
+                        params.toString()
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to delete file."
+            );
+
+        }
+
+
+        /*
+         * Remove the file from the Host UI.
+         */
+
+        const item =
+            document.querySelector(
+                `[data-file-id="${fileId}"]`
+            );
+
+
+        if (item) {
+
+            item.remove();
+
+        }
+
+
+        /*
+         * Restore the empty message if
+         * there are no files remaining.
+         */
+
+        const list =
+            document.getElementById(
+                "sharedFileList"
+            );
+
+
+        if (
+            list &&
+            list.children.length === 0
+        ) {
+
+            list.innerHTML =
+                `
+                <div
+                    id="emptySharedFiles"
+                    class="text-secondary text-center small"
+                >
+
+                    No files shared yet.
+
+                </div>
+                `;
+
+        }
+
+
+        /*
+         * Tell all connected participants
+         * that this file was deleted.
+         */
+
+        await sendSignal({
+
+            type:
+                "shared_file_deleted",
+
+            file_id:
+                fileId
+
+        });
+
+
+        showToast(
+            "File deleted successfully."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Delete shared file:",
+            error
+        );
+
+
+        showToast(
+            error.message ||
+            "Unable to delete file."
+        );
+
+    }
 
 }
 
