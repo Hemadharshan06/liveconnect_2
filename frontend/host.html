@@ -1441,6 +1441,8 @@ let participantNames = {};
 
 let participantMuteStates = {};
 
+let participantCameraStates = {};
+
 let cameraEnabled = true;
 
 let microphoneEnabled = true;
@@ -2700,6 +2702,9 @@ function addParticipant(
     participantMuteStates[id] =
         false;
 
+    participantCameraStates[id] =
+        false;
+
 
     const item =
         document.createElement(
@@ -2744,33 +2749,45 @@ function addParticipant(
 
 
         <div
-            class="d-flex align-items-center gap-1 ms-2"
-        >
+    class="d-flex align-items-center gap-1 ms-2"
+>
 
-            <button
-                type="button"
-                class="btn btn-warning btn-sm participant-mute-button"
-                title="Mute participant"
-                onclick="toggleParticipantMute(${Number(id)})"
-            >
+    <button
+        type="button"
+        class="btn btn-warning btn-sm participant-mute-button"
+        title="Mute participant"
+        onclick="toggleParticipantMute(${Number(id)})"
+    >
 
-                <i class="bi bi-mic-mute"></i>
+        <i class="bi bi-mic-mute"></i>
 
-            </button>
+    </button>
 
 
-            <button
-                type="button"
-                class="btn btn-danger btn-sm"
-                title="Remove participant"
-                onclick="removeParticipantFromWebinar(${Number(id)})"
-            >
+    <button
+        type="button"
+        class="btn btn-info btn-sm participant-camera-button"
+        title="Turn camera off"
+        onclick="toggleParticipantCamera(${Number(id)})"
+    >
 
-                <i class="bi bi-person-x"></i>
+        <i class="bi bi-camera-video"></i>
 
-            </button>
+    </button>
 
-        </div>
+
+    <button
+        type="button"
+        class="btn btn-danger btn-sm"
+        title="Remove participant"
+        onclick="removeParticipantFromWebinar(${Number(id)})"
+    >
+
+        <i class="bi bi-person-x"></i>
+
+    </button>
+
+</div>
         `;
 
 
@@ -3086,6 +3103,163 @@ function updateParticipantMuteButton(
 
 }
 
+
+// =====================================================
+// TOGGLE PARTICIPANT CAMERA
+// =====================================================
+
+async function toggleParticipantCamera(
+    participantIdToToggle
+) {
+
+    if (
+        !participantIdToToggle
+    ) {
+
+        return;
+
+    }
+
+
+    const isCurrentlyOff =
+        participantCameraStates[
+            participantIdToToggle
+        ] === true;
+
+
+    const signalType =
+        isCurrentlyOff
+            ? "participant_camera_on"
+            : "participant_camera_off";
+
+
+    const result =
+        await sendSignal({
+
+            type:
+                signalType,
+
+            participant_id:
+                Number(
+                    participantIdToToggle
+                )
+
+        });
+
+
+    if (
+        !result ||
+        !result.success
+    ) {
+
+        showToast(
+            isCurrentlyOff
+                ? "Unable to turn camera on."
+                : "Unable to turn camera off."
+        );
+
+        return;
+
+    }
+
+
+    participantCameraStates[
+        participantIdToToggle
+    ] =
+        !isCurrentlyOff;
+
+
+    updateParticipantCameraButton(
+        participantIdToToggle
+    );
+
+
+    showToast(
+        isCurrentlyOff
+            ? "Participant camera turned on."
+            : "Participant camera turned off."
+    );
+
+}
+
+
+// =====================================================
+// UPDATE PARTICIPANT CAMERA BUTTON
+// =====================================================
+
+function updateParticipantCameraButton(
+    participantId
+) {
+
+    const item =
+        document.querySelector(
+            `[data-participant-id="${participantId}"]`
+        );
+
+
+    if (
+        !item
+    ) {
+
+        return;
+
+    }
+
+
+    const button =
+        item.querySelector(
+            ".participant-camera-button"
+        );
+
+
+    if (
+        !button
+    ) {
+
+        return;
+
+    }
+
+
+    const isCameraOff =
+        participantCameraStates[
+            participantId
+        ] === true;
+
+
+    if (
+        isCameraOff
+    ) {
+
+        button.className =
+            "btn btn-success btn-sm participant-camera-button";
+
+        button.title =
+            "Turn camera on";
+
+        button.innerHTML =
+            `
+            <i class="bi bi-camera-video-off"></i>
+            `;
+
+    }
+
+    else {
+
+        button.className =
+            "btn btn-info btn-sm participant-camera-button";
+
+        button.title =
+            "Turn camera off";
+
+        button.innerHTML =
+            `
+            <i class="bi bi-camera-video"></i>
+            `;
+
+    }
+
+}
 
 
 

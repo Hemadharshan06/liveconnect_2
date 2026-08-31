@@ -1293,6 +1293,8 @@ let hasVoted = false;
 let mutedByHost = false;
 
 
+let cameraDisabledByHost = false;
+
 // =====================================================
 // SHARED JOIN LINK
 // =====================================================
@@ -2772,6 +2774,188 @@ if (
         return;
 
     }
+
+
+    // ================================================
+// PARTICIPANT CAMERA OFF BY HOST
+// ================================================
+
+if (
+    data.type ===
+    "participant_camera_off"
+) {
+
+    if (
+        Number(
+            data.participant_id
+        ) !==
+        Number(
+            participantId
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        localStream
+    ) {
+
+        localStream
+            .getVideoTracks()
+            .forEach(
+                function(track) {
+
+                    track.enabled =
+                        false;
+
+                }
+            );
+
+    }
+
+
+    cameraDisabledByHost =
+        true;
+
+
+    cameraEnabled =
+        false;
+
+
+    const cameraIcon =
+        document.getElementById(
+            "cameraIcon"
+        );
+
+
+    if (
+        cameraIcon
+    ) {
+
+        cameraIcon.className =
+            "bi bi-camera-video-off";
+
+    }
+
+
+    const cameraText =
+        document.getElementById(
+            "cameraText"
+        );
+
+
+    if (
+        cameraText
+    ) {
+
+        cameraText.textContent =
+            "Start Video";
+
+    }
+
+
+    showToast(
+        "The host turned off your camera."
+    );
+
+
+    return;
+
+}
+
+
+// ================================================
+// PARTICIPANT CAMERA ON BY HOST
+// ================================================
+
+if (
+    data.type ===
+    "participant_camera_on"
+) {
+
+    if (
+        Number(
+            data.participant_id
+        ) !==
+        Number(
+            participantId
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        localStream
+    ) {
+
+        localStream
+            .getVideoTracks()
+            .forEach(
+                function(track) {
+
+                    track.enabled =
+                        true;
+
+                }
+            );
+
+    }
+
+
+    cameraDisabledByHost =
+    false;
+
+
+    cameraEnabled =
+        true;
+
+
+    const cameraIcon =
+        document.getElementById(
+            "cameraIcon"
+        );
+
+
+    if (
+        cameraIcon
+    ) {
+
+        cameraIcon.className =
+            "bi bi-camera-video";
+
+    }
+
+
+    const cameraText =
+        document.getElementById(
+            "cameraText"
+        );
+
+
+    if (
+        cameraText
+    ) {
+
+        cameraText.textContent =
+            "Video";
+
+    }
+
+
+    showToast(
+        "The host turned your camera back on."
+    );
+
+
+    return;
+
+}
 
 
     // ================================================
@@ -5196,6 +5380,19 @@ function toggleMute() {
 // =====================================================
 
 function toggleCamera() {
+
+
+        if (
+        cameraDisabledByHost
+    ) {
+
+        showToast(
+            "The host has turned off your camera."
+        );
+
+        return;
+
+    }
 
     if (
         !localStream
