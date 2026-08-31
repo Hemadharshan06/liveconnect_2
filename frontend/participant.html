@@ -82,6 +82,16 @@ body {
         rgba(0,0,0,.3);
 }
 
+.form-control:focus {
+
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(59,130,246,.15);
+
+}
+
 #webinarSection {
 
     height: 100vh;
@@ -434,14 +444,38 @@ body {
     color: #9ca3af;
 
     cursor: pointer;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    padding: 0 4px;
+
+    transition:
+        color .2s ease,
+        background .2s ease;
 }
+
+
+.tab:hover {
+
+    color: white;
+
+    background: #273244;
+
+}
+
 
 .tab.active {
 
     color: white;
 
+    background: #273244;
+
     border-bottom:
         2px solid #3b82f6;
+
+    font-weight: 600;
 }
 
 .panel {
@@ -489,6 +523,61 @@ body {
     display: flex;
 
     justify-content: space-between;
+}
+
+.shared-file-item {
+
+    background: #374151;
+
+    border-radius: 8px;
+
+    padding: 10px;
+
+    margin-bottom: 8px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 10px;
+
+    transition:
+        transform .15s ease,
+        background .15s ease;
+}
+
+
+.shared-file-item:hover {
+
+    background: #414b5d;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.shared-file-icon {
+
+    width: 34px;
+
+    height: 34px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #1f2937;
+
+    font-size: 18px;
+
 }
 
 .question {
@@ -596,9 +685,62 @@ body {
     background: #4b5563;
 }
 
+.control-divider {
+
+    width: 1px;
+
+    height: 34px;
+
+    background: #4b5563;
+
+    margin: 0 4px;
+
+}
+
+.control.active-control {
+
+    background: #2563eb;
+
+}
+
+
+.control.muted-control {
+
+    background: #dc2626;
+
+}
+
+
+.control.off-control {
+
+    background: #dc2626;
+
+}
+
+
+.control.active-control:hover {
+
+    background: #1d4ed8;
+
+}
+
+
+.control.muted-control:hover,
+.control.off-control:hover {
+
+    background: #b91c1c;
+
+}
+
 .leave {
 
     background: #dc2626;
+}
+
+.leave {
+
+    font-weight: 600;
+
 }
 
 @media(max-width:850px) {
@@ -715,17 +857,46 @@ body {
             Enter your name and webinar code.
         </p>
 
-        <input
-            id="participantName"
-            class="form-control mb-3"
-            placeholder="Your name"
-        >
+       <div class="mb-3">
 
-        <input
-            id="joinCode"
-            class="form-control mb-3 text-uppercase"
-            placeholder="Webinar code"
-        >
+    <label
+        for="participantName"
+        class="form-label fw-semibold"
+    >
+        Your Name
+    </label>
+
+    <input
+        id="participantName"
+        class="form-control"
+        placeholder="Enter your name"
+        autocomplete="name"
+    >
+
+</div>
+
+
+<div class="mb-3">
+
+    <label
+        for="joinCode"
+        class="form-label fw-semibold"
+    >
+        Webinar Code
+    </label>
+
+    <input
+        id="joinCode"
+        class="form-control text-uppercase"
+        placeholder="Enter webinar code"
+        autocomplete="off"
+    >
+
+    <div class="form-text">
+        You can also open a shared join link.
+    </div>
+
+</div>
 
         <button
             id="joinButton"
@@ -1153,6 +1324,8 @@ body {
         </span>
 
     </button>
+
+    <div class="control-divider"></div>
 
     <button
         class="control"
@@ -2653,6 +2826,41 @@ if (
 
 }
 
+const muteButton =
+    document.getElementById(
+        "muteButton"
+    );
+
+
+if (
+    muteButton
+) {
+
+    muteButton.classList.remove(
+        "active-control",
+        "muted-control"
+    );
+
+
+    if (
+        microphoneEnabled
+    ) {
+
+        muteButton.classList.add(
+            "active-control"
+        );
+
+    }
+
+    else {
+
+        muteButton.classList.add(
+            "muted-control"
+        );
+
+    }
+
+}
 
 
         /*
@@ -2763,6 +2971,26 @@ if (
             muteText.textContent =
                 "Mute";
 
+        const muteButton =
+    document.getElementById(
+        "muteButton"
+    );
+
+if (
+    muteButton
+) {
+
+    muteButton.classList.remove(
+        "active-control",
+        "muted-control"
+    );
+
+    muteButton.classList.add(
+        "active-control"
+    );
+
+}
+
         }
 
 
@@ -2855,6 +3083,42 @@ if (
             "Start Video";
 
     }
+
+    const videoButton =
+    document.getElementById(
+        "videoButton"
+    );
+
+
+if (
+    videoButton
+) {
+
+    videoButton.classList.remove(
+        "active-control",
+        "off-control"
+    );
+
+
+    if (
+        cameraEnabled
+    ) {
+
+        videoButton.classList.add(
+            "active-control"
+        );
+
+    }
+
+    else {
+
+        videoButton.classList.add(
+            "off-control"
+        );
+
+    }
+
+}
 
 
     showToast(
@@ -4221,7 +4485,7 @@ function addParticipant(
 
 
     item.className =
-        "participant-item";
+    "participant-item";
 
 
     item.dataset.participantId =
@@ -5372,6 +5636,42 @@ function toggleMute() {
             ? "Mute"
             : "Unmute";
 
+    const muteButton =
+    document.getElementById(
+        "muteButton"
+    );
+
+
+if (
+    muteButton
+) {
+
+    muteButton.classList.remove(
+        "active-control",
+        "muted-control"
+    );
+
+
+    if (
+        microphoneEnabled
+    ) {
+
+        muteButton.classList.add(
+            "active-control"
+        );
+
+    }
+
+    else {
+
+        muteButton.classList.add(
+            "muted-control"
+        );
+
+    }
+
+}
+
 }
 
 
@@ -5436,6 +5736,42 @@ function toggleCamera() {
         cameraEnabled
             ? "Video"
             : "Start Video";
+
+    const videoButton =
+    document.getElementById(
+        "videoButton"
+    );
+
+
+if (
+    videoButton
+) {
+
+    videoButton.classList.remove(
+        "active-control",
+        "off-control"
+    );
+
+
+    if (
+        cameraEnabled
+    ) {
+
+        videoButton.classList.add(
+            "active-control"
+        );
+
+    }
+
+    else {
+
+        videoButton.classList.add(
+            "off-control"
+        );
+
+    }
+
+}
 
 }
 
@@ -5661,6 +5997,97 @@ function showPanel(
 
 }
 
+
+function getSharedFileIcon(
+    fileName,
+    fileType
+) {
+
+    const name =
+        String(
+            fileName || ""
+        ).toLowerCase();
+
+    const type =
+        String(
+            fileType || ""
+        ).toLowerCase();
+
+
+    if (
+        type.startsWith("image/") ||
+        /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(name)
+    ) {
+
+        return "bi bi-file-earmark-image";
+
+    }
+
+
+    if (
+        type.includes("pdf") ||
+        name.endsWith(".pdf")
+    ) {
+
+        return "bi bi-file-earmark-pdf";
+
+    }
+
+
+    if (
+        type.includes("word") ||
+        /\.(doc|docx)$/i.test(name)
+    ) {
+
+        return "bi bi-file-earmark-word";
+
+    }
+
+
+    if (
+        type.includes("presentation") ||
+        /\.(ppt|pptx)$/i.test(name)
+    ) {
+
+        return "bi bi-file-earmark-slides";
+
+    }
+
+
+    if (
+        type.includes("sheet") ||
+        type.includes("excel") ||
+        /\.(xls|xlsx|csv)$/i.test(name)
+    ) {
+
+        return "bi bi-file-earmark-spreadsheet";
+
+    }
+
+
+    if (
+        /\.(zip|rar|7z|tar|gz)$/i.test(name)
+    ) {
+
+        return "bi bi-file-earmark-zip";
+
+    }
+
+
+    if (
+        type.startsWith("text/") ||
+        /\.(txt|rtf|md)$/i.test(name)
+    ) {
+
+        return "bi bi-file-earmark-text";
+
+    }
+
+
+    return "bi bi-file-earmark";
+
+}
+
 // =====================================================
 // SHARED FILES
 // =====================================================
@@ -5724,8 +6151,7 @@ function addSharedFile(
 
 
     item.className =
-        "participant-item";
-
+    "shared-file-item";
 
     if (fileId) {
 
@@ -5759,44 +6185,79 @@ function addSharedFile(
 
 
     item.innerHTML =
-        `
-        <div style="min-width:0;">
+    `
+    <div
+        class="d-flex align-items-center"
+        style="
+            min-width:0;
+            flex:1;
+            gap:10px;
+        "
+    >
+
+        <span
+            class="shared-file-icon"
+        >
+
+            <i
+                class="${getSharedFileIcon(
+                    name,
+                    file.file_type
+                )}"
+            ></i>
+
+        </span>
+
+
+        <div
+            style="
+                min-width:0;
+                flex:1;
+            "
+        >
 
             <div
                 class="fw-bold text-light"
-                style="word-break:break-word;"
+                style="
+                    word-break:break-word;
+                "
             >
-
-                <i class="bi bi-file-earmark me-1"></i>
 
                 ${escapeHtml(name)}
 
             </div>
 
-            <div class="small text-secondary">
+            <div
+                class="small text-secondary"
+            >
 
                 ${escapeHtml(sender)}
 
-                ${size
-                    ? ` • ${escapeHtml(size)}`
-                    : ""
+                ${
+                    size
+                        ? ` • ${escapeHtml(size)}`
+                        : ""
                 }
 
             </div>
 
         </div>
 
+
         <a
             href="${escapeHtml(fileUrl)}"
             target="_blank"
             rel="noopener noreferrer"
             class="btn btn-primary btn-sm ms-2"
+            title="Open file"
         >
 
             <i class="bi bi-download"></i>
 
         </a>
-        `;
+
+    </div>
+    `;
 
 
     list.appendChild(
