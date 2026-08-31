@@ -2888,6 +2888,84 @@ async function removeParticipantFromWebinar(
     );
 
 }
+
+// =====================================================
+// TOGGLE PARTICIPANT MUTE
+// =====================================================
+
+async function toggleParticipantMute(
+    participantIdToToggle
+) {
+
+    if (
+        !participantIdToToggle
+    ) {
+
+        return;
+
+    }
+
+
+    const isCurrentlyMuted =
+        participantMuteStates[
+            participantIdToToggle
+        ] === true;
+
+
+    const signalType =
+        isCurrentlyMuted
+            ? "participant_unmuted"
+            : "participant_muted";
+
+
+    const result =
+        await sendSignal({
+
+            type:
+                signalType,
+
+            participant_id:
+                Number(
+                    participantIdToToggle
+                )
+
+        });
+
+
+    if (
+        !result ||
+        !result.success
+    ) {
+
+        showToast(
+            isCurrentlyMuted
+                ? "Unable to unmute participant."
+                : "Unable to mute participant."
+        );
+
+        return;
+
+    }
+
+
+    participantMuteStates[
+        participantIdToToggle
+    ] =
+        !isCurrentlyMuted;
+
+
+    updateParticipantMuteButton(
+        participantIdToToggle
+    );
+
+
+    showToast(
+        isCurrentlyMuted
+            ? "Participant unmuted."
+            : "Participant muted."
+    );
+
+}
 // =====================================================
 // PARTICIPANT MUTE BUTTON
 // =====================================================
@@ -3008,108 +3086,7 @@ function updateParticipantMuteButton(
 
 }
 
-// ================================================
-// PARTICIPANT UNMUTED BY HOST
-// ================================================
 
-if (
-    data.type ===
-    "participant_unmuted"
-) {
-
-    if (
-        Number(
-            data.participant_id
-        ) !==
-        Number(
-            participantId
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    /*
-     * Host has released the mute.
-     */
-
-    mutedByHost =
-        false;
-
-
-    /*
-     * Turn the participant microphone
-     * back on.
-     */
-
-    if (
-        localStream
-    ) {
-
-        localStream
-            .getAudioTracks()
-            .forEach(
-                function(track) {
-
-                    track.enabled =
-                        true;
-
-                }
-            );
-
-    }
-
-
-    microphoneEnabled =
-        true;
-
-
-    /*
-     * Restore normal microphone icon.
-     */
-
-    const muteIcon =
-        document.getElementById(
-            "muteIcon"
-        );
-
-
-    if (
-        muteIcon
-    ) {
-
-        muteIcon.className =
-            "bi bi-mic";
-
-    }
-
-
-    const muteText =
-        document.getElementById(
-            "muteText"
-        );
-
-
-    if (
-        muteText
-    ) {
-
-        muteText.textContent =
-            "Mute";
-
-    }
-
-
-    showToast(
-        "The host unmuted your microphone."
-    );
-
-
-    return;
-
-}
 
 
 // =====================================================
